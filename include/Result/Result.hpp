@@ -1,10 +1,16 @@
 #ifndef RESULT_H
 #define RESULT_H
 
-#include <concepts> // for: default_initializable;
+#include <concepts> // for: std::default_initializable<>;
+#include <type_traits> // for: std::conditional;
+#include <ostream> // for: std::ostream;
+#include <iostream> // for: std::cout;
 #include "../Error/Error.hpp" // for concept Error;
 
 namespace throwless {
+
+// used in Result<T, E> if T = void
+struct EmptyStruct {};
 
 template<typename T, typename E> requires Error<E>
 class Result {
@@ -14,18 +20,22 @@ private: //* supstructures :
         Error,
     };
 
+private: //* usings :
+    using ValueType = std::conditional_t<std::is_void_v<T>, EmptyStruct, T>;
+
 private: //* fields :
     State state;
-    union { T ok_value; E err_value; };
+    union { ValueType ok_value; E err_value; };
     
 public: //* methods :
     //*   <--- static mnemonic methods that call the constructor from an argument --->
-    static Result Ok(const T& value) noexcept;
-    static Result Ok(T&& value) noexcept;
+    static Result Ok(const ValueType& value) noexcept   requires (!std::is_void_v<T>);
+    static Result Ok(ValueType&& value) noexcept        requires (!std::is_void_v<T>);
     static Result Err(const E& error) noexcept;
     static Result Err(E&& error) noexcept;
 
     //*   <--- constructors, (~)ro5, destructor --->
+    Result() noexcept requires std::is_void_v<T>;
     Result(const Result& other) noexcept;
     Result(Result&& other) noexcept;
     Result& operator=(const Result& other) noexcept;
@@ -36,8 +46,8 @@ public: //* methods :
     bool is_ok() const noexcept;
     bool is_err() const noexcept;
 
-    T& unwrap_or(T& default_value) noexcept;
-    const T& unwrap_or(const T& default_value) const noexcept;
+    ValueType& unwrap_or(ValueType& default_value) noexcept;
+    const ValueType& unwrap_or(const ValueType& default_value) const noexcept;
     T unwrap_or_default() const noexcept requires std::default_initializable<T>;
 
     E& unwrap_err_or(E& default_err) noexcept;
@@ -45,6 +55,7 @@ public: //* methods :
     E unwrap_err_or_default() const noexcept requires std::default_initializable<E>;
 
     //*   <--- functional methods (from funcprog)  --->
+    // we use the universal reference `Fn&&` (saves the value category (lvalue/rvalue) of the passed object)
     template<typename Fn, typename U = std::invoke_result_t<Fn, T>>
     Result<U, E> map(Fn&& fn) const;
     
@@ -65,8 +76,8 @@ public: //* methods :
 
 private: //* methods :
     //*   <--- constructors that are called by static methods Ok(value), Err(error) --->
-    explicit Result(T&& value) noexcept;
-    explicit Result(const T& value) noexcept;
+    explicit Result(ValueType&& value) noexcept;
+    explicit Result(const ValueType& value) noexcept;
     explicit Result(E&& error) noexcept;
     explicit Result(const E& error) noexcept;
 

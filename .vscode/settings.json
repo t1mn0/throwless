@@ -43,7 +43,8 @@
         "numbers": "cpp",
         "typeinfo": "cpp",
         "*.tpp": "cpp",
-        "istream": "cpp"
+        "istream": "cpp",
+        "iostream": "cpp"
     },
     "C_Cpp.errorSquiggles": "disabled"
 }
