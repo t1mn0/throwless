@@ -23,8 +23,11 @@ Result<T, E>::Result(E&& error) noexcept : state(State::Error), err_value(std::m
 template <typename T, typename E> requires Error<E>
 Result<T, E>::Result(const ValueType& value) noexcept : state(State::Ok), ok_value(value) {}
 
+//? It might be worth considering errors as non-copyable objects...
+#if 0
 template <typename T, typename E> requires Error<E>
 Result<T, E>::Result(const E& error) noexcept : state(State::Error), err_value(error) {}
+# endif
 
 template <typename T, typename E> requires Error<E>
 Result<T,E> Result<T, E>::Ok(const ValueType& value) noexcept requires (!std::is_void_v<T>) {
@@ -38,7 +41,7 @@ Result<T,E> Result<T, E>::Ok(ValueType&& value) noexcept requires (!std::is_void
 
 template <typename T, typename E> requires Error<E>
 Result<T,E> Result<T, E>::Err(const E& error) noexcept {
-    return Result(error);
+    return Result(std::move(error));
 }
 
 template <typename T, typename E> requires Error<E>
@@ -163,10 +166,12 @@ const E& Result<T, E>::unwrap_err_or(const E& default_err) const noexcept {
     return is_err() ? err_value : default_err;
 }
 
+#if 0
 template <typename T, typename E> requires Error<E>
 E Result<T, E>::unwrap_err_or_default() const noexcept requires std::default_initializable<E> {
     return is_err() ? err_value : E{};
 }
+#endif
 
 //*   <--- functional methods (from funcprog)  --->
 

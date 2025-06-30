@@ -3,19 +3,15 @@
 
 #include <string>
 #include <concepts> // for: std::convertible_to<>;
+
 #include "../Result/Result.hpp"
+#include "ErrorConcept.hpp"
 
 namespace throwless {
 
-//* <--- The basic concept that the "Error" type structure should correspond to --->
-template<typename E>
-concept Error = requires(E e) {
-    { e.message() } -> std::convertible_to<std::string>;
-};
-
 //* <--- Basic wrappers for classic error handling methods --->
 struct StringError {
-    std::string msg;
+    std::string msg = "Undefined error";
     std::string message() const noexcept { return msg; }
 };
 
@@ -26,13 +22,21 @@ struct CodeError {
 
 struct ExceptionError {
     std::exception_ptr ptr;
-    std::string context;
+    std::string context = "empty Context";
 
 public:
-    explicit ExceptionError(std::exception_ptr ptr, std::string context = "") noexcept;
-    explicit ExceptionError(std::string context = "") noexcept;
+    explicit ExceptionError(std::exception_ptr ptr, std::string context) noexcept;
+    explicit ExceptionError(std::exception_ptr ptr) noexcept;
+    explicit ExceptionError(std::string context) noexcept;
+    explicit ExceptionError() noexcept;
+    ExceptionError(const ExceptionError&) = delete;
+    ExceptionError& operator=(const ExceptionError&) = delete;
+    ExceptionError(ExceptionError&& other) noexcept;
+    ExceptionError& operator=(ExceptionError&& other) noexcept;
+    ~ExceptionError();
     
-    std::string message() const noexcept;
+    
+    std::string message() const noexcept { return "ExceptionError with context: '" + context + "'"; }
 };
 
 //* <--- Functions that can help to process code written in the style of exception handling, in the style of error handling --->
@@ -46,11 +50,13 @@ class Result;
 
 // we use the universal reference `Fn&&` (saves the value category (lvalue/rvalue) of the passed object)
 template<typename Fn, typename... Args>
-auto capture_exception(Fn&& fn, Args&&... args) -> Result<std::invoke_result_t<Fn>, ExceptionError>;
+auto capture_exception(Fn&& fn, Args&&... args) -> Result<std::invoke_result_t<Fn, Args...>, ExceptionError>;
 
 template<typename Fn, typename... Args>
-auto try_or_convert(Fn&& fn, Args&&... args) -> Result<std::invoke_result_t<Fn>, ExceptionError>;
+auto try_or_convert(Fn&& fn, Args&&... args) -> Result<std::invoke_result_t<Fn, Args...>, ExceptionError>;
 
 } // end of namespace 'throwless'
+
+#include "../../src/Error/Error.tpp"
 
 #endif

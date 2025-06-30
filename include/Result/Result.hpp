@@ -5,7 +5,7 @@
 #include <type_traits> // for: std::conditional;
 #include <ostream> // for: std::ostream;
 #include <iostream> // for: std::cout;
-#include "../Error/Error.hpp" // for concept Error;
+#include "../Error/ErrorConcept.hpp" // for concept Error;
 
 namespace throwless {
 
@@ -64,13 +64,15 @@ public: //* methods :
 
     // TODO : and_then, or_else;
 
-    //*   <--- methods for logging the internal state  --->
+    //?   <--- methods for logging the internal state  --->
+    #if 0
     Result& log(std::ostream& os = std::cout, const char* message = "") const &;
     Result&& log(std::ostream& os = std::cout, const char* message = "") const &&;
     Result& log_if_err(std::ostream& os = std::cerr, const char* message = "") const &;
     Result&& log_if_err(std::ostream& os = std::cerr, const char* message = "") const &&;
     Result& log_if_ok(std::ostream& os = std::cout, const char* message = "") const &;
     Result&& log_if_ok(std::ostream& os = std::cout, const char* message = "") const &&;
+    #endif
 
     // TODO : implement these methods;
 
@@ -79,7 +81,7 @@ private: //* methods :
     explicit Result(ValueType&& value) noexcept;
     explicit Result(const ValueType& value) noexcept;
     explicit Result(E&& error) noexcept;
-    explicit Result(const E& error) noexcept;
+    //explicit Result(const E& error) noexcept;
 
 }; // end of class 'Result'
 
