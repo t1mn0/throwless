@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.12)
-project(throwless LANGUAGES CXX)
+project(fpp LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -8,17 +8,17 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # Library
 # =============================================
 
-add_library(throwless INTERFACE)
+add_library(fpp INTERFACE)
 
-target_compile_features(throwless INTERFACE cxx_std_20)
+target_compile_features(fpp INTERFACE cxx_std_20)
 
-target_include_directories(throwless INTERFACE
+target_include_directories(fpp INTERFACE
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>
 )
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
-    target_compile_options(throwless INTERFACE
+    target_compile_options(fpp INTERFACE
         -Wall -Wextra -Wpedantic
         -Wconversion -Wsign-conversion
     )

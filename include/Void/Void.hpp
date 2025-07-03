@@ -5,6 +5,7 @@
 
 namespace throwless {
 
+//? ? ? ? ?
 // In category theory, Either is a monoidal category, where: 
 // - Either<A, B> is an coproduct (A + B)
 // - Void is neutral element (A + 0 = A)
