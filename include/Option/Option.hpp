@@ -19,12 +19,17 @@ public: //* methods :
     Option() noexcept;
     explicit Option(const T& val) noexcept(std::is_nothrow_copy_constructible_v<T>);
     explicit Option(T&& val) noexcept(std::is_nothrow_move_constructible_v<T>);
+
     Option(const Option<T>& oth) noexcept(std::is_nothrow_copy_constructible_v<T>);
     Option(Option<T>&& oth) noexcept(std::is_nothrow_move_constructible_v<T>);
+
     Option& operator=(const Option<T>& oth) noexcept(std::is_nothrow_copy_constructible_v<T> && std::is_nothrow_copy_assignable_v<T>);
     Option& operator=(Option<T>&& oth) noexcept(std::is_nothrow_move_constructible_v<T> && std::is_nothrow_move_assignable_v<T>);
+
     void swap(Option<T>& oth) noexcept(std::is_nothrow_swappable_v<T> && std::is_nothrow_move_constructible_v<T>);
+    
     explicit operator bool() const noexcept;
+
     ~Option();
 
     //*   <--- specialized algorithms & methods  --->
@@ -42,25 +47,19 @@ public: //* methods :
     bool destroy_value() noexcept;
 
     //*   <--- functional methods --->
-    template <typename Func>
-    requires std::invocable<Func, T>
+    template <typename Func> requires std::invocable<Func, T>
     auto map(Func&& fn)
         noexcept(std::is_nothrow_constructible_v<Option<std::invoke_result_t<Func, T>>> && std::is_nothrow_invocable_v<Func, T>)
         -> Option<std::invoke_result_t<Func, T>>;
-
-    template <typename Func>
-    requires std::invocable<Func, T>
-    auto and_then(Func&& fn)
+        
+    template <typename Func> requires std::invocable<Func, T>
+    auto and_then(Func&& fn) const &
         noexcept(std::is_nothrow_constructible_v<Option<std::invoke_result_t<Func, T>>> && std::is_nothrow_invocable_v<Func, T>)
         -> Option<std::invoke_result_t<Func, T>>;
 
     template <typename Func, typename... Args> 
     requires std::invocable<Func, Args...> && std::same_as<std::invoke_result_t<Func, Args...>, Option<T>>
     Option<T> or_else(Func&& fn, Args&&... args) const &;
-    
-    template <typename Func, typename... Args>
-    requires std::invocable<Func, Args...> &&  std::same_as<std::invoke_result_t<Func, Args...>, Option<T>>
-    Option<T> or_else(Func&& fn, Args&&... args) &&;
 
     // coproduction variants (or sum) on the Option<T> monad
     template <typename U> requires Addable<T, U>
@@ -84,10 +83,12 @@ public: //* methods :
 
 // specialization of std::swap delegating to the Option<T> method
 namespace std {
-    template <typename T> requires (!std::is_void_v<T>)
-    void swap(fpp::Option<T>& a, fpp::Option<T>& b) noexcept(noexcept(a.swap(b))) {
-        a.swap(b);
-    }
+
+template <typename T> requires (!std::is_void_v<T>)
+void swap(fpp::Option<T>& a, fpp::Option<T>& b) noexcept(noexcept(a.swap(b))) {
+    a.swap(b);
 }
+
+} // namespace 'std'
 
 #endif // FPP_OPTION_H

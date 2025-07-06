@@ -1,8 +1,8 @@
-#include "../../include/Option/Option.hpp"
-
 #ifndef FPP_OPTION_H
 #error "Include Option.hpp instead of Option.tpp"
 #endif
+
+#include "../../include/Option/Option.hpp"
 
 #include <stdexcept> // for: std::runtime_error;
 #include <utility> // for: std::move, std::swap;
@@ -141,7 +141,7 @@ auto Option<T>::map(Func&& fn)
 
 template <typename T> requires (!std::is_void_v<T> && Copyable<T> && Moveable<T>)
 template <typename Func> requires std::invocable<Func, T>
-auto Option<T>::and_then(Func&& fn)
+auto Option<T>::and_then(Func&& fn) const &
     noexcept(std::is_nothrow_constructible_v<Option<std::invoke_result_t<Func, T>>> && std::is_nothrow_invocable_v<Func, T>)
     -> Option<std::invoke_result_t<Func, T>>
 {
@@ -153,14 +153,7 @@ template <typename T> requires (!std::is_void_v<T> && Copyable<T> && Moveable<T>
 template <typename Func, typename... Args> requires std::invocable<Func, Args...> &&  std::same_as<std::invoke_result_t<Func, Args...>, Option<T>>
 Option<T> Option<T>::or_else(Func&& fn, Args&&... args) const & {
     if (_is_initialized) return *this;
-    return Option<T>(std::forward<Func>(fn)(std::forward<Args>(args)...));
-}
-
-template <typename T> requires (!std::is_void_v<T> && Copyable<T> && Moveable<T>)
-template <typename Func, typename... Args> requires std::invocable<Func, Args...> &&  std::same_as<std::invoke_result_t<Func, Args...>, Option<T>>
-Option<T> Option<T>::or_else(Func&& fn, Args&&... args) && {
-    if (_is_initialized) return std::move(*this);
-    return Option<T>(std::forward<Func>(fn)(std::forward<Args>(args)...));
+    return std::forward<Func>(fn)(std::forward<Args>(args)...);
 }
 
 template <typename T> requires (!std::is_void_v<T> && Copyable<T> && Moveable<T>)
