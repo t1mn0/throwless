@@ -96,11 +96,11 @@ TEST(OptionTest, Map) {
     fpp::Option<int> opt1(42);
     fpp::Option<int> opt2;
     
-    auto doubled = opt1.map([](int x) { return x * 2; });
+    auto doubled = opt1.fmap([](int x) { return x * 2; });
     EXPECT_TRUE(doubled.has_value());
     EXPECT_EQ(doubled.value_or_exception(), 84);
     
-    auto empty = opt2.map([](int x) { return x * 2; });
+    auto empty = opt2.fmap([](int x) { return x * 2; });
     EXPECT_FALSE(empty.has_value());
 }
 

@@ -1,0 +1,142 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"childIndexes" : 
+					[
+						1,
+						2
+					],
+					"hasInstallRule" : true,
+					"jsonFile" : "directory-.-Debug-0825f9414c6f02ce8ee6.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.12"
+					},
+					"projectIndex" : 0,
+					"source" : "."
+				},
+				{
+					"build" : "test/Option",
+					"jsonFile" : "directory-test.Option-Debug-b57b4b9b4b77de3424d9.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.12"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 1,
+					"source" : "test/Option",
+					"targetIndexes" : 
+					[
+						0,
+						2
+					]
+				},
+				{
+					"build" : "test/Either",
+					"jsonFile" : "directory-test.Either-Debug-7aca0d6620f6e4688458.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.12"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 2,
+					"source" : "test/Either",
+					"targetIndexes" : 
+					[
+						1,
+						3
+					]
+				}
+			],
+			"name" : "Debug",
+			"projects" : 
+			[
+				{
+					"childIndexes" : 
+					[
+						1,
+						2
+					],
+					"directoryIndexes" : 
+					[
+						0
+					],
+					"name" : "fpp"
+				},
+				{
+					"directoryIndexes" : 
+					[
+						1
+					],
+					"name" : "fpp_tests",
+					"parentIndex" : 0,
+					"targetIndexes" : 
+					[
+						0,
+						2
+					]
+				},
+				{
+					"directoryIndexes" : 
+					[
+						2
+					],
+					"name" : "fpp_tests",
+					"parentIndex" : 0,
+					"targetIndexes" : 
+					[
+						1,
+						3
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 1,
+					"id" : "ArithmeticTestOption::@89d095261722af8d0e76",
+					"jsonFile" : "target-ArithmeticTestOption-Debug-c1eb67fb1b3ef8d0fc30.json",
+					"name" : "ArithmeticTestOption",
+					"projectIndex" : 1
+				},
+				{
+					"directoryIndex" : 2,
+					"id" : "GeneralTestEither::@c12c4d74c3d006f92809",
+					"jsonFile" : "target-GeneralTestEither-Debug-4240008ab72f4e416dc7.json",
+					"name" : "GeneralTestEither",
+					"projectIndex" : 2
+				},
+				{
+					"directoryIndex" : 1,
+					"id" : "GeneralTestOption::@89d095261722af8d0e76",
+					"jsonFile" : "target-GeneralTestOption-Debug-73f0f8e7de5bbcb01c7e.json",
+					"name" : "GeneralTestOption",
+					"projectIndex" : 1
+				},
+				{
+					"directoryIndex" : 2,
+					"id" : "SpecializationsTest::@c12c4d74c3d006f92809",
+					"jsonFile" : "target-SpecializationsTest-Debug-0997d0bc1010778d6ffa.json",
+					"name" : "SpecializationsTest",
+					"projectIndex" : 2
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "/home/timno/Documents/CPPProjects/throwless/build",
+		"source" : "/home/timno/Documents/CPPProjects/throwless"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 6
+	}
+}

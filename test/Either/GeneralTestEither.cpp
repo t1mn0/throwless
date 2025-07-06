@@ -108,24 +108,24 @@ TEST(EitherTest, TransposeTypes) {
 
 TEST(EitherTest, MapLeft) {
     fpp::Either<int, std::string> left = fpp::Either<int, std::string>::from_left(42);
-    auto mapped = left.map_left([](int x) { return x * 2; });
+    auto mapped = left.fmap_left([](int x) { return x * 2; });
     EXPECT_TRUE(mapped.is_left());
     EXPECT_EQ(mapped.left_value_or_exception(), 84);
 
     fpp::Either<int, std::string> right = fpp::Either<int, std::string>::from_right("error");
-    auto unchanged = right.map_left([](int x) { return x * 2; });
+    auto unchanged = right.fmap_left([](int x) { return x * 2; });
     EXPECT_TRUE(unchanged.is_right());
     EXPECT_EQ(unchanged.right_value_or_exception(), "error");
 }
 
 TEST(EitherTest, MapRight) {
     fpp::Either<std::string, int> left = fpp::Either<std::string, int>::from_left("error");
-    auto unchanged = left.map_right([](int x) { return x * 2; });
+    auto unchanged = left.fmap_right([](int x) { return x * 2; });
     EXPECT_TRUE(unchanged.is_left());
     EXPECT_EQ(unchanged.left_value_or_exception(), "error");
 
     fpp::Either<std::string, int> right = fpp::Either<std::string, int>::from_right(42);
-    auto mapped = right.map_right([](int x) { return x * 2; });
+    auto mapped = right.fmap_right([](int x) { return x * 2; });
     EXPECT_TRUE(mapped.is_right());
     EXPECT_EQ(mapped.right_value_or_exception(), 84);
 }

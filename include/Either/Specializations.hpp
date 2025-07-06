@@ -1,1 +1,0 @@
-// for void types parameter

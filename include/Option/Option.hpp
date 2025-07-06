@@ -8,7 +8,7 @@
 
 namespace fpp {
 
-template <typename T> requires (!std::is_void_v<T> && Copyable<T> && Moveable<T>)
+template <typename T> requires (!std::is_void_v<T> && CopyableOrVoid<T> && MoveableOrVoid<T>)
 class Option {
 private: //* fields :
     std::byte _value[sizeof(T)];
@@ -48,7 +48,7 @@ public: //* methods :
 
     //*   <--- functional methods --->
     template <typename Func> requires std::invocable<Func, T>
-    auto map(Func&& fn)
+    auto fmap(Func&& fn)
         noexcept(std::is_nothrow_constructible_v<Option<std::invoke_result_t<Func, T>>> && std::is_nothrow_invocable_v<Func, T>)
         -> Option<std::invoke_result_t<Func, T>>;
         
