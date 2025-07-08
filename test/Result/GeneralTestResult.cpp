@@ -101,6 +101,18 @@ TEST(ResultTest, BoolConversion) {
     EXPECT_FALSE(static_cast<bool>(err));
 }
 
+TEST(ResultConversions, ToEither) {
+    fpp::Result<int, fpp::StringError> ok = fpp::Result<int, fpp::StringError>::Ok(42);
+    fpp::Either<int, fpp::StringError> e = ok.to_either();
+    EXPECT_TRUE(e.is_left());
+    EXPECT_EQ(e.left_value_or_exception(), 42);
+    
+    fpp::Result<int, fpp::StringError> err = fpp::Result<int, fpp::StringError>::Err(fpp::StringError("failed"));
+    fpp::Either<int, fpp::StringError> e2 = err.to_either();
+    EXPECT_TRUE(e2.is_right());
+    EXPECT_EQ(e2.right_value_or_exception().err_message(), "failed");
+}
+
 TEST(ResultCustomTypeTest, WorksWithCustomTypes) {
     struct Point {
         int x, y;

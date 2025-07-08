@@ -156,6 +156,38 @@ Result<T, E>::operator bool() const noexcept{
     return is_ok();
 }
 
+template <typename T, typename E> requires (!std::is_void_v<T> && Error<E>)
+Either<T, E> Result<T, E>::to_either() const & {
+    if (is_ok()) {
+        return Either<T, E>::from_left(ok_value);
+    }
+    return Either<T, E>::from_right(err_value);
+}
+
+template <typename T, typename E> requires (!std::is_void_v<T> && Error<E>)
+Either<T, E> Result<T, E>::to_either() && {
+    if (is_ok()) {
+        return Either<T, E>::from_left(std::move(*this).ok_value);
+    }
+    return Either<T, E>::from_right(std::move(*this).err_value);
+}
+
+template <typename T, typename E> requires (!std::is_void_v<T> && Error<E>)
+Option<T> Result<T, E>::to_option() const & {
+    if (is_ok()) {
+        return Option<T>(ok_value);
+    }
+    return Option<T>();
+}
+
+template <typename T, typename E> requires (!std::is_void_v<T> && Error<E>)
+Option<T> Result<T, E>::to_option() && {
+    if (is_ok()) {
+        return Option<T>(std::move(*this).ok_value);
+    }
+    return Option<T>();
+}
+
 //*   <--- specialized algorithms & methods  --->
 
 template <typename T, typename E> requires (!std::is_void_v<T> && Error<E>)
@@ -214,7 +246,7 @@ Option<E> Result<T, E>::unwrap_err() const noexcept(std::is_nothrow_copy_constru
 }
 
 template <typename T, typename E> requires (!std::is_void_v<T> && Error<E>)
-E& Result<T, E>::unwrap_err_or_exception(E& err) {
+E& Result<T, E>::unwrap_err_or_exception() {
     if (is_ok()) {
         throw std::runtime_error("Result<T, E> does not contain Error");
     }
@@ -222,7 +254,7 @@ E& Result<T, E>::unwrap_err_or_exception(E& err) {
 }
 
 template <typename T, typename E> requires (!std::is_void_v<T> && Error<E>)
-const E& Result<T, E>::unwrap_err_or_exception(const E& err) const {
+const E& Result<T, E>::unwrap_err_or_exception() const {
     if (is_ok()) {
         throw std::runtime_error("Result<T, E> does not contain Error");
     }

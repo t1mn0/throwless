@@ -102,7 +102,8 @@ public: //* methods :
 } // namespace 'fpp'
 
 #include "../../src/Either/Either.tpp"
-#include "../../src/Either/Specializations.hpp"
+#include "../../src/Either/Either<L>.hpp"
+#include "../../src/Either/Either<R>.hpp"
 
 // specialization of std::swap delegating to the Either<T> method
 namespace std {

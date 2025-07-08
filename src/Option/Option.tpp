@@ -22,7 +22,7 @@ Option<T>::Option(const T& val) noexcept(std::is_nothrow_copy_constructible_v<T>
 
 template <typename T> requires (!std::is_void_v<T> && CopyableOrVoid<T> && MoveableOrVoid<T>)
 Option<T>::Option(T&& val) noexcept(std::is_nothrow_move_constructible_v<T>) : _is_initialized(true) {
-    new (_value) T(val);
+    new (_value) T(std::move(val));
 }
 
 template <typename T> requires (!std::is_void_v<T> && CopyableOrVoid<T> && MoveableOrVoid<T>)
@@ -116,6 +116,55 @@ bool Option<T>::operator==(const Option& oth) const noexcept {
     return *reinterpret_cast<T*>(_value) == *reinterpret_cast<T*>(oth._value);
 }
 
+template <typename T> requires (!std::is_void_v<T> && CopyableOrVoid<T> && MoveableOrVoid<T>)
+Either<T, void> Option<T>::to_either_left() const & {
+    if (this->has_value()) {
+        return Either<T, void>::from_left(this->value_or_exception());
+    }
+    return Either<T, void>::from_right();
+}
+
+template <typename T> requires (!std::is_void_v<T> && CopyableOrVoid<T> && MoveableOrVoid<T>)
+Either<T, void> Option<T>::to_either_left() && {
+    if (this->has_value()) {
+        return Either<T, void>::from_left(std::move(*this).value_or_exception());
+    }
+    return Either<T, void>::from_right();
+}
+
+template <typename T> requires (!std::is_void_v<T> && CopyableOrVoid<T> && MoveableOrVoid<T>)
+Either<void, T> Option<T>::to_either_right() const & {
+    if (this->has_value()) {
+        return Either<void, T>::from_right(this->value_or_exception());
+    }
+    return Either<void, T>::from_left();
+}
+
+template <typename T> requires (!std::is_void_v<T> && CopyableOrVoid<T> && MoveableOrVoid<T>)
+Either<void, T> Option<T>::to_either_right() && {
+    if (this->has_value()) {
+        return Either<void, T>::from_right(std::move(*this).value_or_exception());
+    }
+    return Either<void, T>::from_left();
+}
+
+template <typename T> requires (!std::is_void_v<T> && CopyableOrVoid<T> && MoveableOrVoid<T>)
+template <typename E> requires (!std::is_void_v<T> && Error<E>)
+Result<T, E> Option<T>::to_result(E error_if_none) const & {
+    if (has_value()) {
+        return Result<T, E>::Ok(value_or_exception());
+    }
+    return Result<T, E>::Err(error_if_none);
+}
+
+template <typename T> requires (!std::is_void_v<T> && CopyableOrVoid<T> && MoveableOrVoid<T>)
+template <typename E> requires (!std::is_void_v<T> && Error<E>)
+Result<T, E> Option<T>::to_result(E error_if_none) && {
+    if (has_value()) {
+        return Result<T, E>::Ok(std::move(*this).value_or_exception());
+    }
+    return Result<T, E>::Err(error_if_none);
+}
 
 template <typename T> requires (!std::is_void_v<T> && CopyableOrVoid<T> && MoveableOrVoid<T>)
 bool Option<T>::destroy_value() noexcept {

@@ -185,3 +185,39 @@ TEST(OptionTest, MixedChain) {
     EXPECT_TRUE(result.has_value());
     EXPECT_EQ(result.value_or_exception(), 30);
 }
+
+TEST(OptionEitherConversion, LeftVoid) {
+    fpp::Option<int> some(42);
+    fpp::Option<int> none;
+    
+    auto e1 = some.to_either_left();
+    EXPECT_TRUE(e1.is_left());
+    EXPECT_EQ(e1.left_value_or_exception(), 42);
+    
+    auto e2 = none.to_either_left();
+    EXPECT_TRUE(e2.is_right());
+}
+
+TEST(OptionEitherConversion, RightVoid) {
+    fpp::Option<std::string> some("test");
+    fpp::Option<std::string> none;
+    
+    auto e1 = some.to_either_right();
+    EXPECT_TRUE(e1.is_right());
+    EXPECT_EQ(e1.right_value_or_exception(), "test");
+    
+    auto e2 = none.to_either_right();
+    EXPECT_TRUE(e2.is_left());
+}
+
+TEST(OptionConversions, ToResult) {
+    fpp::Option<int> some(100);
+    fpp::Result<int, fpp::StringError> res = some.to_result(fpp::StringError("missing"));
+    EXPECT_TRUE(res.is_ok());
+    EXPECT_EQ(res.unwrap_or_exception(), 100);
+    
+    fpp::Option<int> none;
+    fpp::Result<int, fpp::StringError> res2 = none.to_result(fpp::StringError("missing"));
+    EXPECT_TRUE(res2.is_err());
+    EXPECT_EQ(res2.unwrap_err_or_exception().err_message(), "missing");
+}

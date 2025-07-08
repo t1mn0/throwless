@@ -4,6 +4,7 @@
 #include <concepts> // for: std::default_initializable<>;
 #include <type_traits> // for: std::conditional, std::is_nothrow_constructible;
 #include "../Option/Option.hpp"
+#include "../Either/Either.hpp"
 #include "../Error/ErrorConcept.hpp"
 
 namespace fpp {
@@ -37,7 +38,19 @@ public:
         noexcept(std::is_nothrow_swappable_v<T> && std::is_nothrow_move_constructible_v<T> &&
                  std::is_nothrow_swappable_v<E> && std::is_nothrow_move_constructible_v<E>);
 
+    // Conversions (cast) :
     explicit operator bool() const noexcept;
+
+    Either<T, E> to_either() const &;
+    Either<T, E> to_either() &&;
+    
+    Option<T> to_option() const &;
+    Option<T> to_option() &&;
+
+    explicit operator Either<T, E>() const & { return to_either(); }
+    explicit operator Either<T, E>() && { return std::move(*this).to_either(); }
+    explicit operator Option<T>() const & { return to_option(); }
+    explicit operator Option<T>() && { return std::move(*this).to_option(); }
 
     //*   <--- static mnemonic methods that call the constructor from an argument --->
     static Result Ok(const T& val) noexcept   requires (!std::is_void_v<T>);
@@ -57,8 +70,8 @@ public:
     T unwrap_or_default() const noexcept requires std::default_initializable<T>;
 
     Option<E> unwrap_err() const noexcept(std::is_nothrow_copy_constructible_v<E>);
-    E& unwrap_err_or_exception(E& err);
-    const E& unwrap_err_or_exception(const E& err) const;
+    E& unwrap_err_or_exception();
+    const E& unwrap_err_or_exception() const;
 
     //*   <--- functional methods (from funcprog)  --->
     template<typename Func> requires std::invocable<Func, T>
@@ -85,5 +98,6 @@ private:
 } // namespace 'fpp'
 
 #include "../../src/Result/Result.tpp"
+#include "../Error/Error.hpp"
 
 #endif // FPP_RESULT_HPP

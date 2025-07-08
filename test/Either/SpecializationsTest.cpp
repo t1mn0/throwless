@@ -46,7 +46,7 @@ TEST(EitherLVoidTest, FunctionalMethods) {
     EXPECT_TRUE(mapped_right.is_right());
 }
 
-TEST(EitherVoidRTest, ValueConstructors) {
+TEST(EitherRVoidTest, ValueConstructors) {
     fpp::Either<void, int> left = fpp::Either<void, int>::from_left();
     EXPECT_TRUE(left.is_left());
     EXPECT_NO_THROW(left.left_value_or_exception());
@@ -56,7 +56,7 @@ TEST(EitherVoidRTest, ValueConstructors) {
     EXPECT_EQ(right.right_value_or_exception(), 42);
 }
 
-TEST(EitherVoidRTest, MoveConstructors) {
+TEST(EitherRVoidTest, MoveConstructors) {
     fpp::Either<void, std::string> left = fpp::Either<void, std::string>::from_left();
     EXPECT_TRUE(left.is_left());
 
@@ -65,7 +65,7 @@ TEST(EitherVoidRTest, MoveConstructors) {
     EXPECT_EQ(right.right_value_or_exception(), "error");
 }
 
-TEST(EitherVoidRTest, CopyOperations) {
+TEST(EitherRVoidTest, CopyOperations) {
     fpp::Either<void, int> original = fpp::Either<void, int>::from_right(42);
     fpp::Either<void, int> copy(original);
     
@@ -77,7 +77,7 @@ TEST(EitherVoidRTest, CopyOperations) {
     
     EXPECT_TRUE(copy_left.is_left());
 }
-TEST(EitherVoidRTest, FunctionalMethods) {
+TEST(EitherRVoidTest, FunctionalMethods) {
     fpp::Either<void, int> right(42);
     auto mapped_right = right.fmap_right([](int x) { return x * 2; });
     EXPECT_TRUE(mapped_right.is_right());
@@ -88,7 +88,7 @@ TEST(EitherVoidRTest, FunctionalMethods) {
     EXPECT_TRUE(mapped_left.is_left());
 }
 
-TEST(EitherVoidRTest, Transpose) {
+TEST(EitherRVoidTest, Transpose) {
     fpp::Either<int, void> original_left(42);
     auto transposed_left = original_left.transpose_types();
     EXPECT_TRUE(transposed_left.is_right());
@@ -110,7 +110,7 @@ TEST(EitherLVoidTest, SwapOperations) {
     EXPECT_EQ(b.left_value_or_exception(), 42);
 }
 
-TEST(EitherVoidRTest, SwapOperations) {
+TEST(EitherRVoidTest, SwapOperations) {
     fpp::Either<void, int> a = fpp::Either<void, int>::from_left();
     fpp::Either<void, int> b(42);
     
@@ -131,7 +131,7 @@ TEST(EitherLVoidTest, ValueOr) {
     EXPECT_EQ(right.left_value_or_default(), 0);
 }
 
-TEST(EitherVoidRTest, ValueOr) {
+TEST(EitherRVoidTest, ValueOr) {
     fpp::Either<void, int> right(42);
     EXPECT_EQ(right.right_value_or(10), 42);
     
@@ -139,4 +139,23 @@ TEST(EitherVoidRTest, ValueOr) {
     EXPECT_EQ(left.right_value_or(10), 10);
     
     EXPECT_EQ(left.right_value_or_default(), 0);
+}
+
+TEST(EitherOptionConversion, Basic) {
+    // Either -> Option
+    fpp::Either<int, void> e1 = fpp::Either<int, void>::from_left(42);
+    fpp::Option<int> o1 = e1.to_option();
+    EXPECT_TRUE(o1.has_value());
+    EXPECT_EQ(o1.value_or_exception(), 42);
+
+    // Option -> Either
+    fpp::Option<std::string> o2{"test"};
+    fpp::Either<std::string, void> e2 = fpp::Either<std::string, void>::from_option(o2);
+    EXPECT_TRUE(e2.is_left());
+    EXPECT_EQ(e2.left_value_or_exception(), "test");
+
+    // Empty case
+    fpp::Either<double, void> e3 = fpp::Either<double, void>::from_right();
+    fpp::Option<double> o3 = e3.to_option();
+    EXPECT_FALSE(o3.has_value());
 }

@@ -1,18 +1,26 @@
 #ifndef FPP_OPTION_HPP
 #define FPP_OPTION_HPP
 
-#include <cstddef> // for: std::byte;
 #include <concepts> // for: default_initializable, std::invocable;
 #include <type_traits> // for std::is_nothrow_constructible, std::is_void_v
 #include "../UsedConcepts/Concepts.hpp"
+#include "../Error/ErrorConcept.hpp"
 
 namespace fpp {
+
+// forward-declarations:
+template <typename L, typename R> 
+requires (!std::is_same_v<L, R> && CopyableOrVoid<L> && CopyableOrVoid<R> && MoveableOrVoid<L> && MoveableOrVoid<R>)
+class Either;
+
+template<typename T, typename E> requires (!std::is_void_v<T> && Error<E>)
+class Result;
 
 template <typename T> requires (!std::is_void_v<T> && CopyableOrVoid<T> && MoveableOrVoid<T>)
 class Option {
 private: //* fields :
-    std::byte _value[sizeof(T)];
-    bool      _is_initialized;
+    alignas(T) char _value[sizeof(T)];
+    bool      _is_initialized = false;
 
 public: //* methods :
     //*   <--- constructors, (~)ro5, destructor --->
@@ -42,6 +50,19 @@ public: //* methods :
     const T& value_or_exception() const;
 
     bool operator==(const Option<T>& oth) const noexcept;
+
+    // Conversions (cast) :
+    Either<T, void> to_either_left() const &;
+    Either<T, void> to_either_left() &&;
+    
+    Either<void, T> to_either_right() const &;
+    Either<void, T> to_either_right() &&;
+
+    template <typename E> requires (!std::is_void_v<T> && Error<E>)
+    Result<T, E> to_result(E error_if_none) const &;
+    
+    template <typename E> requires (!std::is_void_v<T> && Error<E>)
+    Result<T, E> to_result(E error_if_none) &&;
 
     // returns true if the object has been initialized and destroyed
     bool destroy_value() noexcept;
@@ -74,12 +95,20 @@ public: //* methods :
     template <typename U> requires Dividable<T, U>
     Option<T>& operator/=(const Option<U>& rhs);
 
+private: //* friends :
+    template <typename L, typename R> 
+    requires (!std::is_same_v<L, R> && CopyableOrVoid<L> && CopyableOrVoid<R> && MoveableOrVoid<L> && MoveableOrVoid<R>)
+    friend class Either;
+
 }; // class 'Option'
 
 } // namespace 'fpp'
 
 #include "CoproductOperations.hpp"
 #include "../../src/Option/Option.tpp"
+#include "../Either/Either.hpp"
+#include "../Result/Result.hpp"
+#include "../Error/Error.hpp"
 
 // specialization of std::swap delegating to the Option<T> method
 namespace std {
