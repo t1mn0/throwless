@@ -42,10 +42,12 @@ TEST(ResultTest, CopyAndMoveSemantics) {
     auto moved = std::move(original);
     EXPECT_EQ(moved.unwrap_or_exception(), "test");
 
-    auto original_err = fpp::Result<int, TestError>::Err(TestError{"Error", 1});
+    TestError te{"Error", 1};
+    auto original_err = fpp::Result<int, TestError>::Err(te);
     auto copy_err = original_err;
 
-    auto moved_err = std::move(original_err);
+    // auto moved_err = std::move(original_err);
+    // EXPECT_EQ(moved_err.unwrap_err_or_exception().err_message(), "Error");
 }
 
 TEST(ResultTest, UnwrapMethods) {

@@ -39,25 +39,28 @@ Result<T,E> Result<T, E>::Ok(T&& val) noexcept requires (!std::is_void_v<T>) {
 
 template <typename T, typename E> requires (!std::is_void_v<T> && Error<E>)
 Result<T,E> Result<T, E>::Err(const E& err) noexcept {
-    return Result(std::move(err));
+    return Result(err);
 }
 
 template <typename T, typename E> requires (!std::is_void_v<T> && Error<E>)
 Result<T,E> Result<T, E>::Err(E&& err) noexcept {
-    return Result(err);
+    return Result(std::move(err));
 }
 
 template <typename T, typename E> requires (!std::is_void_v<T> && Error<E>)
 Result<T, E>::Result(const Result& oth) 
     noexcept(std::is_nothrow_copy_constructible_v<T> && std::is_nothrow_copy_constructible_v<E>) 
 {
-    if (oth.is_ok()) {
-        ok_value = oth.ok_value;
+    if (oth.state == State::OkState) {
+        new (&ok_value) T(oth.ok_value);
         state = State::OkState;
     } 
-    else {
-        err_value = oth.err_value;
+    else if (oth.state == State::ErrState) {
+        new (&err_value) E(oth.err_value);
         state = State::ErrState;
+    }
+    else if (oth.state == State::Uninitialized) {
+        state = State::Uninitialized;
     }
 }
 
@@ -69,11 +72,15 @@ Result<T, E>::Result(Result&& oth)
         // ok_value = std::move(oth.ok_value);
         new (&ok_value) T(std::move(oth.ok_value));
         state = State::OkState;
+        oth.ok_value.~T();
+        oth.state = State::Uninitialized;
     } 
     else {
         // err_value = std::move(oth.err_value);
         new (&err_value) E(std::move(oth.err_value));
         state = State::ErrState;
+        oth.err_value.~E();
+        oth.state = State::Uninitialized;
     }
 }
 
@@ -94,10 +101,10 @@ Result<T,E>& Result<T, E>::operator=(const Result<T,E>& oth)
 
     state = oth.state;
     if (state == State::OkState) {
-        ok_value = oth.ok_value;
+        new (&ok_value) T(oth.ok_value);
     } 
     else if (state == State::ErrState) {
-        err_value = oth.err_value;
+        new (&err_value) E(oth.err_value);
     }
 
     return *this;
@@ -121,9 +128,11 @@ Result<T,E>& Result<T,E>::operator=(Result<T,E>&& oth)
     state = oth.state;
     if (state == State::OkState) {
         new (&ok_value) T(std::move(oth.ok_value));
+        oth.ok_value.~T();
     } 
     else if (state == State::ErrState) {
         new (&err_value) E(std::move(oth.err_value));
+        oth.err_value.~E();
     }
 
     return *this;
@@ -131,10 +140,10 @@ Result<T,E>& Result<T,E>::operator=(Result<T,E>&& oth)
 
 template <typename T, typename E> requires (!std::is_void_v<T> && Error<E>)
 Result<T, E>::~Result() {
-    if (is_ok()) {
+    if (state == State::OkState) {
         ok_value.~T();
     }
-    else {
+    else if (state == State::ErrState) {
         err_value.~E();
     }
 }
@@ -223,6 +232,10 @@ T& Result<T, E>::unwrap_or_exception() {
     if (is_err()) {
         throw std::runtime_error(err_value.err_message());
     }
+    else if (state == State::Uninitialized) {
+        throw std::runtime_error("Accessing moved-from Result");
+    }
+
     return ok_value;
 }
 

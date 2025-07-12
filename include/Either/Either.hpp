@@ -82,12 +82,10 @@ public: //* methods :
             std::is_nothrow_move_assignable_v<L> && std::is_nothrow_move_assignable_v<R>);
 
     //*   <--- functional methods --->
-    template <typename Func>
-    requires std::invocable<Func, L>
+    template <typename Func> requires std::invocable<Func, L>
     auto fmap_left(Func&& fn) const -> Either<std::invoke_result_t<Func,L>, R>;
 
-    template <typename Func>
-    requires std::invocable<Func, R>
+    template <typename Func> requires std::invocable<Func, R>
     auto fmap_right(Func&& fn) const -> Either<L, std::invoke_result_t<Func,R>>;
 
     // TODO : implement it with type-conversion support without cutting the fmap method by 2 :

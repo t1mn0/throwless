@@ -255,8 +255,7 @@ void Either<L, R>::destroy_value() noexcept {
 //*   <--- functional methods --->
 template <typename L, typename R>
 requires (!std::is_same_v<L, R> && CopyableOrVoid<L> && CopyableOrVoid<R> && MoveableOrVoid<L> && MoveableOrVoid<R>)
-template <typename Func>
-requires (std::invocable<Func, L>)
+template <typename Func> requires std::invocable<Func, L>
 auto Either<L, R>::fmap_left(Func&& fn) const -> Either<std::invoke_result_t<Func,L>, R> {
     if (is_left()) {
         return Either<std::invoke_result_t<Func,L>, R>::from_left(
@@ -267,8 +266,7 @@ auto Either<L, R>::fmap_left(Func&& fn) const -> Either<std::invoke_result_t<Fun
 
 template <typename L, typename R>
 requires (!std::is_same_v<L, R> && CopyableOrVoid<L> && CopyableOrVoid<R> && MoveableOrVoid<L> && MoveableOrVoid<R>)
-template <typename Func>
-requires (std::invocable<Func, R>)
+template <typename Func> requires std::invocable<Func, R>
 auto Either<L, R>::fmap_right(Func&& fn) const -> Either<L, std::invoke_result_t<Func,R>> {
     if (is_right()) {
         return Either<L, std::invoke_result_t<Func,R>>::from_right(

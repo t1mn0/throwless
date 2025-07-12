@@ -15,6 +15,7 @@ private: //* substructures :
     enum class State {
         OkState,
         ErrState,
+        Uninitialized
     };
 
 private: //* fields :
