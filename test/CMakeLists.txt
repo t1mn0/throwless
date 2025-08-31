@@ -9,7 +9,7 @@ endif()
 
 function(fpp_add_test TEST_NAME TEST_SOURCE)
     add_executable(${TEST_NAME} ${TEST_SOURCE})
-    
+
     target_link_libraries(${TEST_NAME}
         PRIVATE fpp::fpp
         PRIVATE GTest::gtest GTest::gtest_main
@@ -19,13 +19,12 @@ function(fpp_add_test TEST_NAME TEST_SOURCE)
         target_compile_options(${TEST_NAME} PRIVATE -fsanitize=address,undefined)
         target_link_options(${TEST_NAME} PRIVATE -fsanitize=address,undefined)
     endif()
-    
+
     add_test(NAME ${TEST_NAME} COMMAND ${TEST_NAME})
 endfunction()
 
-file(GLOB_RECURSE TEST_SOURCES 
+file(GLOB_RECURSE TEST_SOURCES
     "Option/*.cpp"
-    "Either/*.cpp" 
     "Result/*.cpp"
     "Error/*.cpp"
 )

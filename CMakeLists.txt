@@ -26,11 +26,11 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
         -Wall -Wextra -Wpedantic
         -Wconversion -Wsign-conversion
     )
-    
+
     if(FPPLIB_WARNINGS_AS_ERRORS)
         add_compile_options(-Werror)
     endif()
-    
+
     if(FPPLIB_ENABLE_SANITIZERS)
         add_compile_options(-fsanitize=address,undefined)
         add_link_options(-fsanitize=address,undefined)
@@ -54,7 +54,6 @@ file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/fpp.hpp
     "#pragma once\n\n"
     "#include <fpp/Option.hpp>\n"
     "#include <fpp/Result.hpp>\n"
-    "#include <fpp/Either.hpp>\n"
     "#include <fpp/Error.hpp>\n"
 )
 
@@ -111,8 +110,8 @@ install(
 if(FPPLIB_BUILD_TESTS)
     include(CTest)
     enable_testing()
-    
+
     find_package(GTest REQUIRED)
-    
+
     add_subdirectory(test)
 endif()
