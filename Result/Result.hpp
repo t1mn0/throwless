@@ -5,7 +5,6 @@
 #include <type_traits> // for: conditional, is_nothrow_constructible;
 
 #include "../Option/Option.hpp" // for: class conversion;
-#include "../Error/ErrorConcept.hpp" // for: Error<E> concept;
 
 namespace tmn::err {
 
@@ -35,12 +34,6 @@ public: //* methods:
   Result& operator=(Result&& oth) noexcept(std::is_nothrow_move_constructible_v<T> && std::is_nothrow_move_constructible_v<E>);
   ~Result();
 
-  //*   <--- constructors that are called by static methods Ok(val), Err(error) --->
-  Result(const T& val) noexcept(std::is_nothrow_copy_constructible_v<T>);
-  Result(T&& val) noexcept(std::is_nothrow_move_constructible_v<T>);
-  Result(const E& err) noexcept(std::is_nothrow_copy_constructible_v<E>);
-  Result(E&& err) noexcept(std::is_nothrow_move_constructible_v<E>);
-
   // Conversions (cast) :
   // true if ok_val in union; false if err_val;
   explicit operator bool() const noexcept;
@@ -55,6 +48,12 @@ public: //* methods:
   static Result Ok(T&& val) noexcept        requires (!std::is_void_v<T>);
   static Result Err(const E& error) noexcept;
   static Result Err(E&& error) noexcept;
+
+  template<typename... Args> requires std::constructible_from<T, Args...>
+  static Result Ok(Args&&... args) noexcept(std::is_nothrow_constructible_v<T, Args...>);
+
+  template<typename... Args> requires std::constructible_from<E, Args...>
+  static Result Err(Args&&... args) noexcept(std::is_nothrow_constructible_v<E, Args...>);
 
   //*   <--- specialized algorithms & methods  --->
   bool is_ok() const noexcept;
@@ -89,12 +88,19 @@ public: //* methods:
   requires std::invocable<Func, T> && std::same_as<std::invoke_result_t<Func, T>, Result<std::invoke_result_t<Func, T>, E>>
   auto and_then(Func&& fn) const
     noexcept(std::is_nothrow_constructible_v<Result<std::invoke_result_t<Func, T>, E>> && std::is_nothrow_invocable_v<Func, T>)
-    -> std::invoke_result_t<Func, T>;
+    -> Result<std::invoke_result_t<Func, T>, E>;
 
 private: //* methods:
   void swap(Result<T,E>& oth)
     noexcept(std::is_nothrow_swappable_v<T> && std::is_nothrow_move_constructible_v<T> &&
     std::is_nothrow_swappable_v<E> && std::is_nothrow_move_constructible_v<E>);
+
+  //* private constructors:
+  //*   <--- constructors that are called by static methods Ok(val), Err(error) --->
+  Result(const T& val) noexcept(std::is_nothrow_copy_constructible_v<T>);
+  Result(T&& val) noexcept(std::is_nothrow_move_constructible_v<T>);
+  Result(const E& err) noexcept(std::is_nothrow_copy_constructible_v<E>);
+  Result(E&& err) noexcept(std::is_nothrow_move_constructible_v<E>);
 
 }; // class 'Result';
 

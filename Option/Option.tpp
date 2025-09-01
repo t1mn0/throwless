@@ -5,6 +5,7 @@
 #include <utility> // for: move, swap;
 #include <optional> // for: bad_optional_access (exception);
 #include <type_traits> // for: is_void_v;
+#include <functional> // for: function;
 
 #include "Option.hpp" // for: Option declaration;
 
@@ -171,10 +172,10 @@ template <typename T> requires (!std::is_void_v<T> && CopyableOrVoid<T> && Movea
 template <typename Func> requires std::invocable<Func, T>
 auto Option<T>::and_then(Func&& fn) const
   noexcept(std::is_nothrow_constructible_v<Option<std::invoke_result_t<Func, T>>> && std::is_nothrow_invocable_v<Func, T>)
-  -> std::invoke_result_t<Func, T>
+  -> Option<std::invoke_result_t<Func, T>>
 {
   if (!_is_initialized) return std::invoke_result_t<Func, T>{};
-  return std::forward<Func>(fn)(*reinterpret_cast<const T*>(_value));
+  return Option<std::invoke_result_t<Func, T>>(std::forward<Func>(fn)(*reinterpret_cast<const T*>(_value)));
 }
 
 // For convenient chaining:
@@ -182,10 +183,10 @@ template <typename T> requires (!std::is_void_v<T> && CopyableOrVoid<T> && Movea
 template <typename Func, typename... Args> requires std::invocable<Func, Args...>
 auto Option<T>::or_else(Func&& fn, Args&&... args) const
   noexcept(std::is_nothrow_constructible_v<Option<std::invoke_result_t<Func, T>>> && std::is_nothrow_invocable_v<Func, T>)
-  -> std::invoke_result_t<Func, T>
+  -> Option<std::invoke_result_t<Func, T>>
 {
   if (_is_initialized) return std::invoke_result_t<Func, T>{};
-  return std::forward<Func>(fn)(std::forward<Args>(args)...);
+  return Option<std::invoke_result_t<Func, T>>(std::forward<Func>(fn)(std::forward<Args>(args)...));
 }
 
 // Monoid interface:
@@ -249,6 +250,10 @@ Option<T> Some(T val) noexcept(std::is_nothrow_move_constructible_v<T>) {
   return Option<T>(std::move(val));
 }
 
+static_assert(Functor<Option, int, std::function<double(int)>>, "Option should be a Functor");
+static_assert(Applicative<Option, int, std::function<double(int)>>, "Option should be an Applicative");
+static_assert(Monad<Option, int, std::function<Option<double>(int)>>, "Option should be a Monad");
+
 } // namespace 'tmn::err';
 
 // Specialization of std::swap delegating to the Option<T> private method:
@@ -260,5 +265,3 @@ void swap(tmn::err::Option<T>& a, tmn::err::Option<T>& b) noexcept(noexcept(a.sw
 }
 
 } // namespace 'std';
-
-// TODO: Check that Option satisfies funcprog concepts:

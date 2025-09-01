@@ -29,4 +29,6 @@ auto try_or_convert(Fn&& fn, Args&&... args) -> Result<std::invoke_result_t<Fn, 
 
 };
 
+#include "../Result/Result.hpp"
+
 #endif // THROWLESS_TRY_OR_CONVERT_HPP

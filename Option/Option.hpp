@@ -26,8 +26,8 @@ private: //* fields :
 public: //* methods :
   //*   <--- constructors, (~)ro5, destructor --->
   Option() noexcept;
-  explicit Option(const T& val) noexcept(std::is_nothrow_copy_constructible_v<T>);
-  explicit Option(T&& val) noexcept(std::is_nothrow_move_constructible_v<T>);
+  Option(const T& val) noexcept(std::is_nothrow_copy_constructible_v<T>);
+  Option(T&& val) noexcept(std::is_nothrow_move_constructible_v<T>);
 
   Option(const Option& oth) noexcept(std::is_nothrow_copy_constructible_v<T>);
   Option(Option&& oth) noexcept(std::is_nothrow_move_constructible_v<T>);
@@ -50,7 +50,7 @@ public: //* methods :
 
   bool operator==(const Option<T>& oth) const noexcept;
 
-  // returns true if the object has been initialized and destroyed:
+  // `.destroy_value()` method returns `true` if the object has been initialized and destroyed:
   bool destroy_value() noexcept;
 
   //  <--- conversions (cast) : --->
@@ -73,14 +73,14 @@ public: //* methods :
   template <typename Func> requires std::invocable<Func, T>
   auto and_then(Func&& fn) const
     noexcept(std::is_nothrow_constructible_v<Option<std::invoke_result_t<Func, T>>> && std::is_nothrow_invocable_v<Func, T>)
-    -> std::invoke_result_t<Func, T>;
+    -> Option<std::invoke_result_t<Func, T>>;
 
   template <typename Func, typename... Args> requires std::invocable<Func, Args...>
   auto or_else(Func&& fn, Args&&... args) const
     noexcept(std::is_nothrow_constructible_v<Option<std::invoke_result_t<Func, T>>> && std::is_nothrow_invocable_v<Func, T>)
-     -> std::invoke_result_t<Func, T>;
+     -> Option<std::invoke_result_t<Func, T>>;
 
-  // coproduction variants (or sum) on the Option<T> monad:
+  // Coproduction variants (or sum) on the Option<T> monad:
   template <typename U> requires Addable<T, U>
   Option<T>& operator+=(const Option<U>& rhs);
 
@@ -113,7 +113,6 @@ Option<T> Some(T val) noexcept(std::is_nothrow_move_constructible_v<T>);
 
 #include "Option.tpp" // for: Option definition;
 #include "CoproductOperations.hpp" // for: external monoid functions for Option objects;
-//#include "../Result/Result.hpp" // for: implementation of the Result class, which was previously declared forward;
-
+#include "../Result/Result.hpp" // for: implementation of the Result class, which was previously declared forward;
 
 #endif // THROWLESS_OPTION_HPP

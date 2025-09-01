@@ -49,6 +49,18 @@ Result<T,E> Result<T, E>::Err(E&& err) noexcept {
 }
 
 template <typename T, typename E> requires (!std::is_void_v<T> && Error<E>)
+template<typename... Args> requires std::constructible_from<T, Args...>
+Result<T,E> Result<T, E>::Ok(Args&&... args) noexcept(std::is_nothrow_constructible_v<T, Args...>) {
+  return Result(std::forward<Args>(args)...);
+}
+
+template <typename T, typename E> requires (!std::is_void_v<T> && Error<E>)
+template<typename... Args> requires std::constructible_from<E, Args...>
+Result<T, E> Result<T, E>::Err(Args&&... args) noexcept(std::is_nothrow_constructible_v<E, Args...>) {
+  return Result(std::forward<Args>(args)...);
+}
+
+template <typename T, typename E> requires (!std::is_void_v<T> && Error<E>)
 Result<T, E>::Result(const Result& oth)
   noexcept(std::is_nothrow_copy_constructible_v<T> && std::is_nothrow_copy_constructible_v<E>)
 {
@@ -284,15 +296,22 @@ template <typename Func>
 requires std::invocable<Func, T> && std::same_as<std::invoke_result_t<Func, T>, Result<std::invoke_result_t<Func, T>, E>>
 auto Result<T, E>::and_then(Func&& fn) const
   noexcept(std::is_nothrow_constructible_v<Result<std::invoke_result_t<Func, T>, E>> && std::is_nothrow_invocable_v<Func, T>)
-  -> std::invoke_result_t<Func, T>
+  -> Result<std::invoke_result_t<Func, T>, E>
 {
   if (is_ok()) {
-    return fn(ok_val);
+    return Result<std::invoke_result_t<Func, T>, E>::Ok(fn(ok_val));
   }
   else {
-    return std::invoke_result_t<Func, T>(err_val);
+    return Result<std::invoke_result_t<Func, T>, E>::err_val);
   }
 }
+
+// I didn't figure out quickly how to check Result for compliance
+// with functional concepts, because Result has more than one template parameter:
+#if 0
+static_assert(Functor<Result, int, std::function<double(int)>>, "Result should be a Functor");
+static_assert(Monad<Result, int, std::function<Result<double, StrErr>(int)>>, "Result should be a Monad");
+#endif
 
 } // namespace 'tmn::err';
 
