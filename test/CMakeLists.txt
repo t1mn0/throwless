@@ -14,6 +14,11 @@ set(COMMON_LINK_LIBS
     GTest::gtest_main
 )
 
+add_library(TestUtils INTERFACE)
+target_include_directories(TestUtils INTERFACE
+    ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
 add_executable(ErrorTests
     Error/ErrorTest.cpp
     Error/TryOrConvertTest.cpp
@@ -32,14 +37,8 @@ target_include_directories(OptionTests PRIVATE ${COMMON_INCLUDE_DIRS})
 target_link_libraries(OptionTests PRIVATE ${COMMON_LINK_LIBS})
 add_test(NAME OptionTests COMMAND OptionTests)
 
-#add_executable(ResultTests Result/ResultTest.cpp)
+add_executable(ResultTests Result/GeneralTestResult.cpp)
 
-#target_include_directories(ResultTests PRIVATE ${COMMON_INCLUDE_DIRS})
-#target_link_libraries(ResultTests PRIVATE ${COMMON_LINK_LIBS})
-#add_test(NAME ResultTests COMMAND ResultTests)
-
-add_custom_target(run_all_tests
-    COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure
-    DEPENDS ErrorTests OptionTests ResultTests
-    COMMENT "Running all tests"
-)
+target_include_directories(ResultTests PRIVATE ${COMMON_INCLUDE_DIRS})
+target_link_libraries(ResultTests PRIVATE ${COMMON_LINK_LIBS})
+add_test(NAME ResultTests COMMAND ResultTests)

@@ -1,47 +1,17 @@
 #include <gtest/gtest.h>
 
-#include <random>
 #include <string>
 
 #include "../../Option/Option.hpp"
-
-std::mt19937& get_random_engine() {
-  static std::random_device rd;
-  static std::mt19937 gen(rd());
-  return gen;
-}
-
-template<typename T>
-T generate_random_val(T min, T max) {
-  if constexpr (std::is_integral_v<T>) {
-    std::uniform_int_distribution<T> dist(min, max);
-    return dist(get_random_engine());
-  }
-  else {
-    std::uniform_real_distribution<T> dist(min, max);
-    return dist(get_random_engine());
-  }
-}
-
-struct RandomTestData {
-  static constexpr int min_int = 1;
-  static constexpr int max_int = 100;
-  static constexpr double min_double = 0.1;
-  static constexpr double max_double = 10.0;
-
-  int random_int_1 = generate_random_val(min_int, max_int);
-  int random_int_2 = generate_random_val(min_int, max_int);
-  double random_double_1 = generate_random_val(min_double, max_double);
-  double random_double_2 = generate_random_val(min_double, max_double);
-};
+#include "../RandomGenerator.hpp"
 
 class OptionArithmeticTestFixture : public ::testing::Test {
 protected: //* fields:
-  RandomTestData test_data;
+  tmn::test_utils::RandomTestData test_data;
 
 protected: //* methods:
   void SetUp() override {
-    test_data = RandomTestData{};
+    test_data = tmn::test_utils::RandomTestData{};
   }
 
 };
@@ -88,7 +58,10 @@ TEST_F(OptionArithmeticTestFixture, MultiplicationWithRandomValues) {
 
 TEST_F(OptionArithmeticTestFixture, DivisionWithRandomValues) {
   // Divisor must not be zero:
-  const int divisor = generate_random_val(1, RandomTestData::max_int);
+  const int divisor = tmn::test_utils::generate_random_val(
+    1,
+    tmn::test_utils::RandomTestData::max_int
+  );
 
   tmn::err::Option<int> dividend(test_data.random_int_1);
   tmn::err::Option<int> divisor_opt(divisor);
@@ -111,12 +84,16 @@ TEST_F(OptionArithmeticTestFixture, DivisionByZero) {
 TEST_F(OptionArithmeticTestFixture, CompoundAssignmentOperators) {
   tmn::err::Option<int> a(test_data.random_int_1);
   // Divisor must not be zero:
-  const tmn::err::Option<int> b = generate_random_val(1, RandomTestData::max_int);
+  const tmn::err::Option<int> b = tmn::test_utils::generate_random_val(
+    1,
+    tmn::test_utils::RandomTestData::max_int
+  );
+
   const int original_value = a.value();
 
   a += b;
   ASSERT_TRUE(a.has_value()) << "CompoundAssignmentSum of the Option<int> for two Options with valid values should have the value";
-  EXPECT_EQ(a.value(), original_value + test_data.random_int_2);
+  EXPECT_EQ(a.value(), original_value + b.value());
 
   a -= b;
   ASSERT_TRUE(a.has_value()) << "CompoundAssignmentSubtraction of the Option<int> for two Options with valid values should have the value";
@@ -124,9 +101,9 @@ TEST_F(OptionArithmeticTestFixture, CompoundAssignmentOperators) {
 
   a *= b;
   ASSERT_TRUE(a.has_value()) << "CompoundAssignmentMultiplication of the Option<int> for two Options with valid values should have the value";
-  EXPECT_EQ(a.value(), original_value * test_data.random_int_2);
+  EXPECT_EQ(a.value(), original_value * b.value());
 
-  a = tmn::err::Option<int>(original_value * test_data.random_int_2);
+  a = tmn::err::Option<int>(original_value * b.value());
   a /= b;
   ASSERT_TRUE(a.has_value()) << "CompoundAssignmentDivision of the Option<int> for two Options with valid values should have the value";
   EXPECT_EQ(a.value(), original_value);
@@ -177,7 +154,9 @@ TEST_F(OptionArithmeticTestFixture, OperationsWithEmptyOperands) {
 TEST_F(OptionArithmeticTestFixture, ChainedOperations) {
   const int value1 = test_data.random_int_1;
   const int value2 = test_data.random_int_2;
-  const int value3 = generate_random_val(RandomTestData::min_int, RandomTestData::max_int);
+  const int value3 = tmn::test_utils::generate_random_val(
+    tmn::test_utils::RandomTestData::min_int,
+    tmn::test_utils::RandomTestData::max_int);
 
   tmn::err::Option<int> a(value1);
   tmn::err::Option<int> b(value2);

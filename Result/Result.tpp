@@ -51,13 +51,15 @@ Result<T,E> Result<T, E>::Err(E&& err) noexcept {
 template <typename T, typename E> requires (!std::is_void_v<T> && Error<E>)
 template<typename... Args> requires std::constructible_from<T, Args...>
 Result<T,E> Result<T, E>::Ok(Args&&... args) noexcept(std::is_nothrow_constructible_v<T, Args...>) {
-  return Result(std::forward<Args>(args)...);
+  T v {std::forward<Args>(args)...};
+  return Result(v);
 }
 
 template <typename T, typename E> requires (!std::is_void_v<T> && Error<E>)
 template<typename... Args> requires std::constructible_from<E, Args...>
 Result<T, E> Result<T, E>::Err(Args&&... args) noexcept(std::is_nothrow_constructible_v<E, Args...>) {
-  return Result(std::forward<Args>(args)...);
+  E e {std::forward<Args>(args)...};
+  return Result(e);
 }
 
 template <typename T, typename E> requires (!std::is_void_v<T> && Error<E>)
@@ -284,16 +286,16 @@ auto Result<T, E>::fmap_err(Func&& fn) const
   -> Result<T, std::invoke_result_t<Func, E>>
 {
   if (is_err()) {
-    return Result<T, std::invoke_result_t<Func, E>>(std::forward<Func>(fn)(err_val));
+    return Result<T, std::invoke_result_t<Func, E>>{std::forward<Func>(fn)(err_val)};
   }
   else {
-    return Result<T, std::invoke_result_t<Func, E>>(ok_val);
+    return Result<T, std::invoke_result_t<Func, E>>{ok_val};
   }
 }
 
 template<typename T, typename E> requires (!std::is_void_v<T> && Error<E>)
 template <typename Func>
-requires std::invocable<Func, T> && std::same_as<std::invoke_result_t<Func, T>, Result<std::invoke_result_t<Func, T>, E>>
+requires std::invocable<Func, T>
 auto Result<T, E>::and_then(Func&& fn) const
   noexcept(std::is_nothrow_constructible_v<Result<std::invoke_result_t<Func, T>, E>> && std::is_nothrow_invocable_v<Func, T>)
   -> Result<std::invoke_result_t<Func, T>, E>
@@ -302,7 +304,7 @@ auto Result<T, E>::and_then(Func&& fn) const
     return Result<std::invoke_result_t<Func, T>, E>::Ok(fn(ok_val));
   }
   else {
-    return Result<std::invoke_result_t<Func, T>, E>::err_val;
+    return Result<std::invoke_result_t<Func, T>, E>::Err(err_val);
   }
 }
 
@@ -314,12 +316,3 @@ static_assert(Monad<Result, int, std::function<Result<double, StrErr>(int)>>, "R
 #endif
 
 } // namespace 'tmn::err';
-
-namespace std {
-
-template <typename T, typename E> requires (!std::is_void_v<T> && tmn::err::Error<E>)
-void swap(tmn::err::Result<T,E>& a, tmn::err::Result<T,E>& b) noexcept(noexcept(a.swap(b))) {
-  a.swap(b);
-}
-
-} // namespace 'std';

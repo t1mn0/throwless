@@ -75,10 +75,14 @@ public: //* methods :
     noexcept(std::is_nothrow_constructible_v<Option<std::invoke_result_t<Func, T>>> && std::is_nothrow_invocable_v<Func, T>)
     -> Option<std::invoke_result_t<Func, T>>;
 
-  template <typename Func, typename... Args> requires std::invocable<Func, Args...>
+  // Important restriction:
+  // If Optional<T> contains an valud value, the `or_else()` method
+  // should "forward" its value, so Func(Args) should return an object of type T;
+  template <typename Func, typename... Args>
+  requires std::invocable<Func, Args...> && std::same_as<std::invoke_result_t<Func>, T>
   auto or_else(Func&& fn, Args&&... args) const
     noexcept(std::is_nothrow_constructible_v<Option<std::invoke_result_t<Func, Args...>>> && std::is_nothrow_invocable_v<Func, Args...>)
-     -> Option<std::invoke_result_t<Func, Args...>>;
+     -> Option<T>;
 
   // Coproduction variants (or sum) on the Option<T> monad:
   template <typename U> requires Addable<T, U>

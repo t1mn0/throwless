@@ -85,7 +85,7 @@ public: //* methods:
     -> Result<T, std::invoke_result_t<Func, E>>;
 
   template <typename Func>
-  requires std::invocable<Func, T> && std::same_as<std::invoke_result_t<Func, T>, Result<std::invoke_result_t<Func, T>, E>>
+  requires std::invocable<Func, T>
   auto and_then(Func&& fn) const
     noexcept(std::is_nothrow_constructible_v<Result<std::invoke_result_t<Func, T>, E>> && std::is_nothrow_invocable_v<Func, T>)
     -> Result<std::invoke_result_t<Func, T>, E>;
@@ -101,6 +101,11 @@ private: //* methods:
   Result(T&& val) noexcept(std::is_nothrow_move_constructible_v<T>);
   Result(const E& err) noexcept(std::is_nothrow_copy_constructible_v<E>);
   Result(E&& err) noexcept(std::is_nothrow_move_constructible_v<E>);
+
+private: //* friends:
+  friend void swap(Result<T,E>& first, Result<T,E>& second) noexcept(noexcept(first.swap(second))) {
+    first.swap(second);
+  }
 
 }; // class 'Result';
 

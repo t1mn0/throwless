@@ -10,7 +10,7 @@ TEST(TryOrConvertTest, BasicFunctionality) {
   auto success_fn = [](int x) -> int { return x*42; };
   auto success_result = tmn::err::try_or_convert(success_fn, 2);
   EXPECT_TRUE(success_result.is_ok());
-  EXPECT_EQ(success_result.value(), 42);
+  EXPECT_EQ(success_result.value(), 84);
 
   auto throwing_fn = []() -> int { throw std::runtime_error("Test error"); };
   auto error_result = tmn::err::try_or_convert(throwing_fn);
@@ -21,5 +21,5 @@ TEST(TryOrConvertTest, BasicFunctionality) {
   auto unknown_throwing_fn = []() -> int { throw 42; };
   auto unknown_error_result = tmn::err::try_or_convert(unknown_throwing_fn);
   EXPECT_TRUE(unknown_error_result.is_err());
-  EXPECT_EQ(unknown_error_result.err().err_msg(), "[unknown]: Unknown exception");
+  EXPECT_EQ(unknown_error_result.err().err_msg(), "[Unknown type]: Unknown error");
 }

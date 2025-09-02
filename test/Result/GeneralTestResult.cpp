@@ -1,128 +1,332 @@
+#include <cstddef>
 #include <gtest/gtest.h>
 #include <stdexcept>
 #include <string>
-#include "../../include/Result/Result.hpp"
 
-struct TestError {
-    std::string message;
-    int code;
+#include "../../Result/Result.hpp"
+#include "../../Error/Error.hpp"
+#include "../../Error/ErrorConcept.hpp"
+#include "../RandomGenerator.hpp"
 
-    TestError() = delete;
-    TestError(std::string msg, int code = 0) : message(msg), code(code) {};
-    TestError(const TestError& oth) = default;
-    TestError& operator=(const TestError& oth) = default; 
-    TestError& operator=(TestError&& oth) = default; 
-    TestError(TestError&& oth) = default;
-    ~TestError() = default;
+namespace tmn::test_utils {
 
-    bool operator==(const TestError& other) const noexcept = default;
-    
-    std::string err_message() const noexcept { return message; }
-    int error_code() const noexcept { return code; }
+struct TestErr {
+private:
+  int code = 0;
+
+public:
+  TestErr() = default;
+  TestErr(int code) : code(code) {}
+
+  std::string err_msg() const noexcept { return "Error code: " + std::to_string(code); }
+  const char* what() const noexcept { return "Unknown"; }
+
+  bool operator==(const TestErr& oth) const noexcept { return code == oth.code; }
 };
 
-static_assert(fpp::Error<TestError>, "TestError must satisfy Error concept");
+static_assert(tmn::err::Error<TestErr>, "TestErr must satisfy Error concept");
 
-TEST(ResultTest, BasicConstruction) {
-    auto ok_int = fpp::Result<int, TestError>::Ok(42);
-    EXPECT_TRUE(ok_int.is_ok());
-    EXPECT_FALSE(ok_int.is_err());
-    EXPECT_EQ(ok_int.unwrap_val(), 42);
-
-    auto err = fpp::Result<int, TestError>::Err(TestError{"Failed", 42});
-    EXPECT_FALSE(err.is_ok());
-    EXPECT_TRUE(err.is_err());
 }
 
-TEST(ResultTest, CopyAndMoveSemantics) {
-    auto original = fpp::Result<std::string, TestError>::Ok("test");
-    auto copy = original;
-    EXPECT_EQ(original.unwrap_val(), copy.unwrap_val());
+class ResultOkErrConstructorFixture : public ::testing::Test {
+protected:
+  tmn::test_utils::RandomTestData test_data;
 
-    auto moved = std::move(original);
-    EXPECT_EQ(moved.unwrap_val(), "test");
+  tmn::err::Result<int, tmn::err::StrErr> ok_result =
+    tmn::err::Result<int, tmn::err::StrErr>::Ok(test_data.random_int_1);
 
-    TestError te{"Error", 1};
-    auto original_err = fpp::Result<int, TestError>::Err(te);
-    auto copy_err = original_err;
+  tmn::err::Result<int, tmn::err::StrErr> err_result =
+    tmn::err::Result<int, tmn::err::StrErr>::Err(test_data.random_string);
+};
 
-    // auto moved_err = std::move(original_err);
-    // EXPECT_EQ(moved_err.unwrap_err().err_message(), "Error");
+TEST_F(ResultOkErrConstructorFixture, OkConstructorWithRandomValue) {
+  ASSERT_TRUE(ok_result.is_ok());
+  EXPECT_FALSE(ok_result.is_err());
+  EXPECT_EQ(ok_result.value(), test_data.random_int_1);
 }
 
-TEST(ResultTest, UnwrapMethods) {
-    auto ok = fpp::Result<int, TestError>::Ok(10);
-    EXPECT_EQ(ok.unwrap_to_opt_val().value(), 10);
-
-    auto err = fpp::Result<int, TestError>::Err(TestError{"Error", 2});
-    EXPECT_THROW(err.unwrap_val(), std::runtime_error);
-
-    auto default_val = 100;
-    EXPECT_EQ(err.unwrap_val_or(default_val), default_val);
-    EXPECT_EQ(ok.unwrap_val_or(default_val), 10);
-
-    auto ok_default = fpp::Result<int, TestError>::Ok(0);
-    EXPECT_EQ(ok_default.unwrap_val_or_default(), 0);
+TEST_F(ResultOkErrConstructorFixture, ErrConstructorWithRandomValue) {
+  ASSERT_TRUE(err_result.is_err());
+  EXPECT_FALSE(err_result.is_ok());
+  EXPECT_EQ(err_result.err(), test_data.random_string);
 }
 
-TEST(ResultTest, FunctionalMethods) {
-    auto ok = fpp::Result<int, TestError>::Ok(2);
-    auto squared = ok.fmap([](int x) { return x * x; });
-    EXPECT_EQ(squared.unwrap_val(), 4);
+class ResultCopyConstructorFixture : public ::testing::Test {
+protected:
+  tmn::test_utils::RandomTestData test_data;
+  tmn::err::Result<int, tmn::err::StrErr> original_ok =
+    tmn::err::Result<int, tmn::err::StrErr>::Ok(test_data.random_int_1);
 
-    auto err = fpp::Result<int, TestError>::Err(TestError{"Error", 3});
-    auto mapped_err = err.fmap([](int x) { return x * x; });
-    EXPECT_TRUE(mapped_err.is_err());
+  tmn::err::Result<int, tmn::err::StrErr> original_err =
+    tmn::err::Result<int, tmn::err::StrErr>::Err(test_data.random_string);
+};
 
-    auto chained = ok.and_then([](int x) {
-        return std::to_string(x * 2);
-    });
-    auto q = chained.unwrap_val();
-    EXPECT_EQ(q, "4");
+TEST_F(ResultCopyConstructorFixture, CopyOkResult) {
+  tmn::err::Result<int, tmn::err::StrErr> copied = original_ok;
+
+  ASSERT_TRUE(copied.is_ok());
+  EXPECT_EQ(copied.value(), test_data.random_int_1);
+  ASSERT_TRUE(original_ok.is_ok());
+  EXPECT_EQ(original_ok.value(), test_data.random_int_1);
 }
 
-TEST(ResultTest, SwapTest) {
-    auto ok1 = fpp::Result<int, TestError>::Ok(1);
-    auto ok2 = fpp::Result<int, TestError>::Ok(2);
-    ok1.swap(ok2);
-    EXPECT_EQ(ok1.unwrap_val(), 2);
-    EXPECT_EQ(ok2.unwrap_val(), 1);
+TEST_F(ResultCopyConstructorFixture, CopyErrResult) {
+  tmn::err::Result<int, tmn::err::StrErr> copied = original_err;
 
-    auto err = fpp::Result<int, TestError>::Err(TestError{"Error", 6});
-    ok1.swap(err);
-    EXPECT_TRUE(ok1.is_err());
-    EXPECT_TRUE(err.is_ok());
-    EXPECT_EQ(err.unwrap_val(), 2);
+  ASSERT_TRUE(copied.is_err());
+  EXPECT_EQ(copied.err(), test_data.random_string);
+  ASSERT_TRUE(original_err.is_err());
+  EXPECT_EQ(original_err.err(), test_data.random_string);
 }
 
-TEST(ResultTest, BoolConversion) {
-    auto ok = fpp::Result<int, TestError>::Ok(1);
-    EXPECT_TRUE(static_cast<bool>(ok));
+class ResultMoveConstructorFixture : public ::testing::Test {
+protected:
+  tmn::test_utils::RandomTestData test_data;
+};
 
-    auto err = fpp::Result<int, TestError>::Err(TestError{"Error", 7});
-    EXPECT_FALSE(static_cast<bool>(err));
+TEST_F(ResultMoveConstructorFixture, MoveOkResult) {
+  tmn::err::Result<std::string, tmn::test_utils::TestErr> original =
+    tmn::err::Result<std::string, tmn::test_utils::TestErr>::Ok(test_data.random_string);
+
+  tmn::err::Result<std::string, tmn::test_utils::TestErr> moved = std::move(original);
+
+  ASSERT_TRUE(moved.is_ok());
+  EXPECT_EQ(moved.value(), test_data.random_string);
 }
 
-TEST(ResultConversions, ToEither) {
-    fpp::Result<int, fpp::StringError> ok = fpp::Result<int, fpp::StringError>::Ok(42);
-    fpp::Either<int, fpp::StringError> e = ok.to_either();
-    EXPECT_TRUE(e.is_left());
-    EXPECT_EQ(e.left_value(), 42);
-    
-    fpp::Result<int, fpp::StringError> err = fpp::Result<int, fpp::StringError>::Err(fpp::StringError("failed"));
-    fpp::Either<int, fpp::StringError> e2 = err.to_either();
-    EXPECT_TRUE(e2.is_right());
-    EXPECT_EQ(e2.right_value().err_message(), "failed");
+TEST_F(ResultMoveConstructorFixture, MoveErrResult) {
+  tmn::err::Result<int, tmn::err::StrErr> original =
+    tmn::err::Result<int, tmn::err::StrErr>::Err(test_data.random_string);
+
+  tmn::err::Result<int, tmn::err::StrErr> moved = std::move(original);
+
+  ASSERT_TRUE(moved.is_err());
+  EXPECT_EQ(moved.err(), test_data.random_string);
 }
 
-TEST(ResultCustomTypeTest, WorksWithCustomTypes) {
-    struct Point {
-        int x, y;
-        Point operator*(int scalar) const { return Point{x * scalar, y * scalar}; };
-    };
+class ResultAssignmentFixture : public ::testing::Test {
+protected:
+  tmn::test_utils::RandomTestData test_data;
+  tmn::err::Result<int, tmn::err::StrErr> target;
 
-    auto ok_point = fpp::Result<Point, TestError>::Ok(Point{1, 2});
-    auto scaled = ok_point.fmap([](Point p) { return p * 2; });
-    EXPECT_EQ(scaled.unwrap_val().x, 2);
-    EXPECT_EQ(scaled.unwrap_val().y, 4);
+  // Since Result() = delete, `target` initialized manually:
+  ResultAssignmentFixture()
+    : target(tmn::err::Result<int, tmn::err::StrErr>::Err("initial")) {}
+};
+
+TEST_F(ResultAssignmentFixture, CopyAssignmentOk) {
+  tmn::err::Result<int, tmn::err::StrErr> source =
+    tmn::err::Result<int, tmn::err::StrErr>::Ok(test_data.random_int_1);
+
+  target = source;
+
+  ASSERT_TRUE(target.is_ok());
+  EXPECT_EQ(target.value(), test_data.random_int_1);
+  ASSERT_TRUE(source.is_ok());
+  EXPECT_EQ(source.value(), test_data.random_int_1);
+}
+
+TEST_F(ResultAssignmentFixture, MoveAssignmentErr) {
+  tmn::err::Result<int, tmn::err::StrErr> source =
+    tmn::err::Result<int, tmn::err::StrErr>::Err(test_data.random_string);
+
+  target = std::move(source);
+
+  ASSERT_TRUE(target.is_err());
+  EXPECT_EQ(target.err(), test_data.random_string);
+}
+
+class ResultBoolConversionFixture : public ::testing::Test {
+protected:
+  tmn::test_utils::RandomTestData test_data;
+};
+
+TEST_F(ResultBoolConversionFixture, BoolConversionOk) {
+  tmn::err::Result<int, tmn::err::StrErr> ok_result =
+    tmn::err::Result<int, tmn::err::StrErr>::Ok(test_data.random_int_1);
+
+  EXPECT_TRUE(static_cast<bool>(ok_result));
+}
+
+TEST_F(ResultBoolConversionFixture, BoolConversionErr) {
+  tmn::err::Result<int, tmn::err::StrErr> err_result =
+      tmn::err::Result<int, tmn::err::StrErr>::Err(test_data.random_string);
+
+  EXPECT_FALSE(static_cast<bool>(err_result));
+}
+
+class ResultToOptionFixture : public ::testing::Test {
+protected:
+  tmn::test_utils::RandomTestData test_data;
+};
+
+TEST_F(ResultToOptionFixture, ToOptionFromOk) {
+  tmn::err::Result<int, tmn::err::StrErr> ok_result =
+      tmn::err::Result<int, tmn::err::StrErr>::Ok(test_data.random_int_1);
+
+  auto option = ok_result.to_option();
+
+  ASSERT_TRUE(option.has_value());
+  EXPECT_EQ(option.value(), test_data.random_int_1);
+}
+
+TEST_F(ResultToOptionFixture, ToOptionFromErr) {
+  tmn::err::Result<int, tmn::err::StrErr> err_result =
+    tmn::err::Result<int, tmn::err::StrErr>::Err(test_data.random_string);
+
+  auto option = err_result.to_option();
+
+  EXPECT_FALSE(option.has_value());
+}
+
+class ResultValueAccessFixture : public ::testing::Test {
+protected:
+  tmn::test_utils::RandomTestData test_data;
+  tmn::err::Result<int, tmn::err::StrErr> ok_result =
+    tmn::err::Result<int, tmn::err::StrErr>::Ok(test_data.random_int_1);
+
+  tmn::err::Result<int, tmn::err::StrErr> err_result =
+    tmn::err::Result<int, tmn::err::StrErr>::Err(test_data.random_string);
+};
+
+TEST_F(ResultValueAccessFixture, ValueAccessOk) {
+  EXPECT_EQ(ok_result.value(), test_data.random_int_1);
+  EXPECT_EQ(ok_result.value_or_default(), test_data.random_int_1);
+}
+
+TEST_F(ResultValueAccessFixture, ValueAccessErrThrows) {
+  EXPECT_THROW(err_result.value(), std::runtime_error);
+}
+
+TEST_F(ResultValueAccessFixture, ValueOrWithOk) {
+  const int default_val = tmn::test_utils::generate_random_val(1001, 2000);
+  EXPECT_EQ(ok_result.value_or(default_val), test_data.random_int_1);
+}
+
+TEST_F(ResultValueAccessFixture, ValueOrWithErr) {
+  const int default_val = tmn::test_utils::generate_random_val(1001, 2000);
+  EXPECT_EQ(err_result.value_or(default_val), default_val);
+}
+
+class ResultErrAccessFixture : public ::testing::Test {
+protected:
+  tmn::test_utils::RandomTestData test_data;
+  tmn::err::Result<int, tmn::err::StrErr> ok_result =
+    tmn::err::Result<int, tmn::err::StrErr>::Ok(test_data.random_int_1);
+
+  tmn::err::Result<int, tmn::err::StrErr> err_result =
+    tmn::err::Result<int, tmn::err::StrErr>::Err(test_data.random_string);
+};
+
+TEST_F(ResultErrAccessFixture, ErrAccessOkThrows) {
+  EXPECT_THROW(ok_result.err(), std::runtime_error);
+}
+
+TEST_F(ResultErrAccessFixture, ErrAccessErr) {
+  EXPECT_EQ(err_result.err(), test_data.random_string);
+}
+
+TEST_F(ResultErrAccessFixture, OptionalErrOk) {
+  auto err_opt = ok_result.optional_err();
+  EXPECT_FALSE(err_opt.has_value());
+}
+
+TEST_F(ResultErrAccessFixture, OptionalErrErr) {
+  auto err_opt = err_result.optional_err();
+  ASSERT_TRUE(err_opt.has_value());
+  EXPECT_EQ(err_opt.value(), test_data.random_string);
+}
+
+class ResultFmapFixture : public ::testing::Test {
+protected:
+  tmn::test_utils::RandomTestData test_data;
+};
+
+TEST_F(ResultFmapFixture, FmapOk) {
+  tmn::err::Result<int, tmn::err::StrErr> ok_result =
+    tmn::err::Result<int, tmn::err::StrErr>::Ok(test_data.random_int_1);
+
+  auto transformed = ok_result.fmap([](int x) { return x * 2; });
+
+  ASSERT_TRUE(transformed.is_ok());
+  EXPECT_EQ(transformed.value(), test_data.random_int_1 * 2);
+}
+
+TEST_F(ResultFmapFixture, FmapErr) {
+  tmn::err::Result<int, tmn::err::StrErr> err_result =
+    tmn::err::Result<int, tmn::err::StrErr>::Err(test_data.random_string);
+
+  auto transformed = err_result.fmap([](int x) { return x * 2; });
+
+  ASSERT_TRUE(transformed.is_err());
+  EXPECT_EQ(transformed.err(), test_data.random_string);
+}
+
+class ResultAndThenFixture : public ::testing::Test {
+protected:
+  tmn::test_utils::RandomTestData test_data;
+};
+
+TEST_F(ResultAndThenFixture, AndThenOk) {
+  tmn::err::Result<int, tmn::err::StrErr> ok_result =
+    tmn::err::Result<int, tmn::err::StrErr>::Ok(test_data.random_int_1);
+
+  auto result = ok_result.and_then([](int x) {
+    return std::to_string(x);
+  });
+
+  ASSERT_TRUE(result.is_ok());
+  EXPECT_EQ(result.value(), std::to_string(test_data.random_int_1));
+}
+
+TEST_F(ResultAndThenFixture, AndThenErr) {
+  tmn::err::Result<int, tmn::err::StrErr> err_result =
+    tmn::err::Result<int, tmn::err::StrErr>::Err(test_data.random_string);
+
+  auto result = err_result.and_then([](int x) {
+    return tmn::err::Result<std::string, tmn::err::StrErr>::Ok(std::to_string(x));
+  });
+
+  ASSERT_TRUE(result.is_err());
+  EXPECT_EQ(result.err(), test_data.random_string);
+}
+
+class ResultTemplateMethodsFixture : public ::testing::Test {
+protected:
+  tmn::test_utils::RandomTestData test_data;
+};
+
+TEST_F(ResultTemplateMethodsFixture, OkWithArgs) {
+  auto result = tmn::err::Result<std::string, tmn::test_utils::TestErr>::Ok("test", std::size_t{3});
+
+  ASSERT_TRUE(result.is_ok());
+  EXPECT_EQ(result.value(), "tes");
+}
+
+TEST_F(ResultTemplateMethodsFixture, ErrWithArgs) {
+  auto result = tmn::err::Result<int, tmn::err::StrErr>::Err("error", std::size_t{4});
+
+  ASSERT_TRUE(result.is_err());
+  EXPECT_EQ(result.err(), "erro");
+}
+
+class ResultSwapFixture : public ::testing::Test {
+protected:
+  tmn::test_utils::RandomTestData test_data;
+};
+
+TEST_F(ResultSwapFixture, SwapResults) {
+  tmn::err::Result<int, tmn::err::StrErr> result1 =
+    tmn::err::Result<int, tmn::err::StrErr>::Ok(test_data.random_int_1);
+
+  tmn::err::Result<int, tmn::err::StrErr> result2 =
+    tmn::err::Result<int, tmn::err::StrErr>::Err(test_data.random_string);
+
+  std::swap(result1, result2);
+
+  ASSERT_TRUE(result1.is_err());
+  EXPECT_EQ(result1.err(), test_data.random_string);
+
+  ASSERT_TRUE(result2.is_ok());
+  EXPECT_EQ(result2.value(), test_data.random_int_1);
 }

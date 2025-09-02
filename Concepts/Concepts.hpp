@@ -37,6 +37,13 @@ concept Monad = requires(M<T> monad, Func fn) {
 
   // `and_then` synonymous with `bind` or `flatMap` in a stricter functional programming style:
   { monad.and_then(fn) } -> std::same_as<M<std::invoke_result_t<Func, T>>>;
+  // ... or we can write that asserts in monad's `.and_then()` implementation:
+  // for example Option.and_then():
+  // ...
+  // static_assert(
+  //     is_specialization_of<std::invoke_result_t<Func, T>, Option>::value,
+  //     "and_then must return Option<U>"
+  // );
 };
 
 //*   <--- Concepts for for checking that the template type T supports arithmetic operations --->

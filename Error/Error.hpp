@@ -26,6 +26,9 @@ public:
   StrErr(const std::string& msg) : msg(msg) {}
   StrErr(const char* msg) : msg(msg) {}
 
+  template <typename...Args> requires std::constructible_from<std::string, Args...>
+  StrErr(Args&&... args) : msg(args...) {}
+
   std::string err_msg() const noexcept { return msg; }
   const char* what() const noexcept { return msg.c_str(); }
 
