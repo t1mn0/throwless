@@ -72,6 +72,7 @@ ctest --output-on-failure
 ## Roadmap
 In development:
 
+- More error variations (minimum to cover all `std::exceptions`)
 - Pattern matching utilities (`match` syntax)
 - Chainable combinators
 - Thread-safe atomic versions (?)
