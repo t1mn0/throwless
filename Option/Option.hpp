@@ -42,6 +42,12 @@ public: //* methods :
   //*   <--- specialized algorithms & methods  --->
   bool has_value() const noexcept;
 
+  template <typename... Args> requires std::is_constructible_v<T, Args&&...>
+  T value_or(Args&&... args) const noexcept(std::is_nothrow_constructible_v<T, Args&&...>);
+
+  template <typename U> requires std::is_constructible_v<T, U>
+  T value_or(U&& val) noexcept;
+
   T& value_or(T& val) noexcept;
   const T& value_or(const T& val) const noexcept;
   T value_or_default() noexcept requires std::default_initializable<T>;

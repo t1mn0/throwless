@@ -84,6 +84,19 @@ bool Option<T>::has_value() const noexcept {
 }
 
 template <typename T> requires (!std::is_void_v<T> && err::CopyableOrVoid<T> && err::MoveableOrVoid<T>)
+template <typename... Args> requires std::is_constructible_v<T, Args&&...>
+T Option<T>::value_or(Args&&... args) const noexcept(std::is_nothrow_constructible_v<T, Args&&...>) {
+  if (_is_initialized) return _value;
+  return T(std::forward<Args>(args)...);
+}
+
+template <typename T> requires (!std::is_void_v<T> && err::CopyableOrVoid<T> && err::MoveableOrVoid<T>)
+template <typename U> requires std::is_constructible_v<T, U>
+T Option<T>::value_or(U&& val) noexcept {
+  return _is_initialized ? *reinterpret_cast<T*>(_value) : T(val);
+}
+
+template <typename T> requires (!std::is_void_v<T> && err::CopyableOrVoid<T> && err::MoveableOrVoid<T>)
 T& Option<T>::value_or(T& val) noexcept {
   return _is_initialized ? *reinterpret_cast<T*>(_value) : val;
 }

@@ -1,6 +1,6 @@
 <h1 align="center">throwless</h1>
 
-__throwless__ is lightweight *C++20* (nearly) header-only library for functional programming without exceptions. Provides `Option` and `Result` types for safe error handling and optional values.
+__throwless__ is lightweight *C++20* (nearly) header-only library for functional programming without exceptions. Provides `Option` and `Result` types for safe error handling and optional values, as well as custom smart pointers.
 
 ## Key Features
 - **Exception-free error handling**
@@ -13,6 +13,7 @@ __throwless__ is lightweight *C++20* (nearly) header-only library for functional
 - Error concept & related primitives: [Error](Error/)
 - Errors are actively used in conjunction with wrapper [Result](Result/)
 - Implementation of one of the most useful _monads_: [Option](include/Option/)
+- __todo:__ _describe smart ptr's functionality;_
 
 ## Quick Example
 ```cpp
