@@ -1,4 +1,4 @@
-#ifndef THROWLESS_RESULT_HPP
+#ifndef TMN_THROWLESS_RESULT_HPP
 #error "Include Result.hpp instead of Result.tpp"
 #endif
 

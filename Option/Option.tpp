@@ -1,4 +1,4 @@
-#ifndef THROWLESS_OPTION_HPP
+#ifndef TMN_THROWLESS_OPTION_HPP
 #error "Include Option.hpp instead of Option.tpp"
 #endif
 

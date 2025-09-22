@@ -1,5 +1,5 @@
-#ifndef THROWLESS_OPTION_HPP
-#define THROWLESS_OPTION_HPP
+#ifndef TMN_THROWLESS_OPTION_HPP
+#define TMN_THROWLESS_OPTION_HPP
 
 #include <concepts> // for: default_initializable, invocable;
 #include <type_traits> // for is_nothrow_constructible;
@@ -120,4 +120,4 @@ Option<T> Some(T val) noexcept(std::is_nothrow_move_constructible_v<T>);
 #include "CoproductOperations.hpp" // for: external monoid functions for Option objects;
 #include "../Result/Result.hpp" // for: implementation of the Result class, which was previously declared forward;
 
-#endif // THROWLESS_OPTION_HPP
+#endif // TMN_THROWLESS_OPTION_HPP

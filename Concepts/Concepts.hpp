@@ -1,5 +1,5 @@
-#ifndef THROWLESS_CONCEPTS_HPP
-#define THROWLESS_CONCEPTS_HPP
+#ifndef TMN_THROWLESS_CONCEPTS_HPP
+#define TMN_THROWLESS_CONCEPTS_HPP
 
 #include <type_traits> // for: invoke_result_t;
 #include <concepts> // for: same_as;
@@ -80,4 +80,4 @@ concept Dividable = requires(T a, U b) {
 } // namespace tmn::arithmetic;
 
 
-#endif // THROWLESS_CONCEPTS_HPP;
+#endif // TMN_THROWLESS_CONCEPTS_HPP;

@@ -1,5 +1,5 @@
-#ifndef THROWLESS_ERROR_HPP
-#define THROWLESS_ERROR_HPP
+#ifndef TMN_THROWLESS_ERROR_HPP
+#define TMN_THROWLESS_ERROR_HPP
 
 #include <string>
 #include <concepts> // for: convertible_to;
@@ -60,4 +60,4 @@ static_assert(Error<GeneralExceptionErr>, "ExceptionErr must satisfy Error conce
 
 } // namespace tmn::err;
 
-#endif // THROWLESS_ERROR_HPP;
+#endif // TMN_THROWLESS_ERROR_HPP;

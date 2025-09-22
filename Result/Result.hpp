@@ -1,5 +1,5 @@
-#ifndef THROWLESS_RESULT_HPP
-#define THROWLESS_RESULT_HPP
+#ifndef TMN_THROWLESS_RESULT_HPP
+#define TMN_THROWLESS_RESULT_HPP
 
 #include <concepts> // for: default_initializable<>;
 #include <type_traits> // for: conditional, is_nothrow_constructible;
@@ -113,4 +113,4 @@ private: //* friends:
 
 #include "Result.tpp" // for: Result definition;
 
-#endif // THROWLESS_RESULT_HPP
+#endif // TMN_THROWLESS_RESULT_HPP

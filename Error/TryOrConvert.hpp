@@ -1,5 +1,5 @@
-#ifndef THROWLESS_TRY_OR_CONVERT_HPP
-#define THROWLESS_TRY_OR_CONVERT_HPP
+#ifndef TMN_THROWLESS_TRY_OR_CONVERT_HPP
+#define TMN_THROWLESS_TRY_OR_CONVERT_HPP
 
 //* <--- Functions that can help to process code written in the style of exception handling, in the style of error handling --->
 
@@ -31,4 +31,4 @@ auto try_or_convert(Fn&& fn, Args&&... args) -> Result<std::invoke_result_t<Fn, 
 
 #include "../Result/Result.hpp"
 
-#endif // THROWLESS_TRY_OR_CONVERT_HPP
+#endif // TMN_THROWLESS_TRY_OR_CONVERT_HPP

@@ -1,5 +1,5 @@
-#ifndef THROWLESS_ERROR_CONCEPT_HPP
-#define THROWLESS_ERROR_CONCEPT_HPP
+#ifndef TMN_THROWLESS_ERROR_CONCEPT_HPP
+#define TMN_THROWLESS_ERROR_CONCEPT_HPP
 
 #include <string>
 #include <concepts> // for: convertible_to<T>;
@@ -23,4 +23,4 @@ concept Error = requires(const E& e, E&& moved) {
 
 } // namespace tmn::err;
 
-#endif // THROWLESS_ERROR_CONCEPT_HPP
+#endif // TMN_THROWLESS_ERROR_CONCEPT_HPP
