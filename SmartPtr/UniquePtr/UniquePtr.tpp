@@ -129,6 +129,13 @@ const T& UniquePtr<T, Deleter>::operator*() const & {
 }
 
 template <typename T, typename Deleter>
+T* UniquePtr<T, Deleter>::operator->() const {
+  // assert(resource_ptr != nullptr && "Attempt to access a null UniquePtr via ->");
+  // User should think and process about which pointer the user will receive:
+  return resource_ptr;
+}
+
+template <typename T, typename Deleter>
 void UniquePtr<T, Deleter>::swap(UniquePtr& oth) noexcept {
   std::swap(resource_ptr, oth.resource_ptr);
   std::swap(deleter, oth.deleter);

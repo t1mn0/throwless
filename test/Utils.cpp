@@ -2,12 +2,12 @@
 
 namespace tmn::test_utils {
 
-int TestObject::constructor_count = 0;
-int TestObject::destructor_count = 0;
-int TestObject::copy_count = 0;
-int TestObject::move_count = 0;
+int UniqueTestObject::constructor_count = 0;
+int UniqueTestObject::destructor_count = 0;
+int UniqueTestObject::copy_count = 0;
+int UniqueTestObject::move_count = 0;
 
-int TestDeleter::delete_count = 0;
-int TestDeleter::last_deleted_value = 0;
+int UniqueTestDeleter::delete_count = 0;
+int UniqueTestDeleter::last_deleted_value = 0;
 
 } // namespace tmn::test_utils;

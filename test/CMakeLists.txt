@@ -6,8 +6,8 @@ set(COMMON_INCLUDE_DIRS
     ${CMAKE_SOURCE_DIR}/Error
     ${CMAKE_SOURCE_DIR}/Option
     ${CMAKE_SOURCE_DIR}/Result
-    ${CMAKE_SOURCE_DIR}/UniquePtr
-    ${CMAKE_SOURCE_DIR}
+    ${CMAKE_SOURCE_DIR}/SmartPtr/UniquePtr
+    ${CMAKE_SOURCE_DIR}/SmartPtr/SharedPtr
 )
 
 set(COMMON_LINK_LIBS
@@ -55,3 +55,11 @@ add_executable(UniquePtrTests
 target_include_directories(UniquePtrTests PRIVATE ${COMMON_INCLUDE_DIRS})
 target_link_libraries(UniquePtrTests PRIVATE ${COMMON_LINK_LIBS} TestUtils)
 add_test(NAME UniquePtrTests COMMAND UniquePtrTests)
+
+add_executable(SharedPtrTests
+    SharedPtr/GeneralTestSharedPtr.cpp
+)
+
+target_include_directories(SharedPtrTests PRIVATE ${COMMON_INCLUDE_DIRS})
+target_link_libraries(SharedPtrTests PRIVATE ${COMMON_LINK_LIBS} TestUtils)
+add_test(NAME SharedPtrTests COMMAND SharedPtrTests)
