@@ -148,7 +148,7 @@ public: //* friends:
 
 } // for: namespace tmn;
 
-#include "GeneralUniquePtr.tpp" // for: UniquePtr definition;
-#include "SpecializedUniquePtr.tpp" // for: UniquePtr definition;
+#include "UniquePtr.tpp" // for: UniquePtr<T> definition;
+#include "ArrayUniquePtr.tpp" // for: UniquePtr<T[]> definition;
 
 #endif // TMN_THROWLESS_UNIQUE_PTR_HPP

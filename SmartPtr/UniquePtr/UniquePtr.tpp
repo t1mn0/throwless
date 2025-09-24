@@ -52,9 +52,7 @@ Option<T*> UniquePtr<T, Deleter>::try_get_and_free() noexcept {
 
 template <typename T, typename Deleter>
 T* UniquePtr<T, Deleter>::get_and_free() {
-  if (!has_resource()) {
-    throw std::runtime_error("UniquePtr: no resource to get");
-  }
+  assert(has_resource() && "UniquePtr: no resource to get");
   T* temp = resource_ptr;
   resource_ptr = nullptr;
   return temp;
@@ -86,9 +84,7 @@ Option<T*> UniquePtr<T, Deleter>::try_get() noexcept {
 
 template <typename T, typename Deleter>
 T* UniquePtr<T, Deleter>::get() {
-  if (!has_resource()) {
-    throw std::runtime_error("UniquePtr: no resource to get");
-  }
+  assert(has_resource() && "UniquePtr: no resource to get");
   return resource_ptr;
 }
 
@@ -122,13 +118,13 @@ Option<T> UniquePtr<T, Deleter>::try_get_val() const noexcept {
 
 template <typename T, typename Deleter>
 T& UniquePtr<T, Deleter>::operator*() & {
-  if (!has_resource()) throw std::runtime_error("UniquePtr: no resource to get");
+  assert(has_resource() && "UniquePtr: no resource to get");
   return *resource_ptr;
 }
 
 template <typename T, typename Deleter>
 const T& UniquePtr<T, Deleter>::operator*() const & {
-  if (!has_resource()) throw std::runtime_error("UniquePtr: no resource to get");
+  assert(has_resource() && "UniquePtr: no resource to get");
   return *resource_ptr;
 }
 
