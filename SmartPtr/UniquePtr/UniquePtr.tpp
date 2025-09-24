@@ -134,4 +134,45 @@ void UniquePtr<T, Deleter>::swap(UniquePtr& oth) noexcept {
   std::swap(deleter, oth.deleter);
 }
 
+template <typename T, typename Deleter>
+bool UniquePtr<T, Deleter>::operator==(const UniquePtr& oth) const noexcept {
+  return resource_ptr == oth.resource_ptr;
+}
+
+template <typename T, typename Deleter>
+bool UniquePtr<T, Deleter>::operator!=(const UniquePtr& oth) const noexcept {
+  return resource_ptr != oth.resource_ptr;
+}
+
+template <typename T, typename Deleter>
+bool UniquePtr<T, Deleter>::operator<(const UniquePtr& oth) const noexcept {
+  return resource_ptr < oth.resource_ptr;
+}
+
+template <typename T, typename Deleter>
+bool UniquePtr<T, Deleter>::operator>(const UniquePtr& oth) const noexcept {
+  return resource_ptr > oth.resource_ptr;
+}
+
+//* Global comparison operators:
+template <typename T, typename Deleter>
+bool operator==(const UniquePtr<T, Deleter>& lhs, std::nullptr_t) noexcept {
+  return !static_cast<bool>(lhs);
+}
+
+template <typename T, typename Deleter>
+bool operator==(std::nullptr_t, const UniquePtr<T, Deleter>& rhs) noexcept {
+  return !static_cast<bool>(rhs);;
+}
+
+template <typename T, typename Deleter>
+bool operator!=(const UniquePtr<T, Deleter>& lhs, std::nullptr_t) noexcept {
+  return static_cast<bool>(lhs);
+}
+
+template <typename T, typename Deleter>
+bool operator!=(std::nullptr_t, const UniquePtr<T, Deleter>& rhs) noexcept {
+  return static_cast<bool>(rhs);
+}
+
 } // for: namepspace tmn;

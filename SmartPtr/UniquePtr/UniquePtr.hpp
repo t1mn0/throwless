@@ -81,6 +81,12 @@ public: //* methods:
   T& operator*() &;
   const T& operator*() const&;
 
+  // Ptr comparison operations:
+  bool operator==(const UniquePtr& oth) const noexcept;
+  bool operator!=(const UniquePtr& oth) const noexcept;
+  bool operator>(const UniquePtr& oth) const noexcept;
+  bool operator<(const UniquePtr& oth) const noexcept;
+
 private: //* methods:
   void swap(UniquePtr<T, Deleter>& oth) noexcept;
 
