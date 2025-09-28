@@ -1,11 +1,13 @@
 <h1 align="center">throwless</h1>
 
-__throwless__ is lightweight *C++20* (nearly) header-only library for functional programming without exceptions. Provides `Option` and `Result` types for safe error handling and optional values, as well as custom smart pointers to use an idiomatic approach in division objects and resources.
+__throwless__ is lightweight *C++20* (nearly) header-only library for functional programming without exceptions. Provides `Option`, `Result`, `SmartPtr` types for safe error handling and optional values, as well idiomatic approach in division objects and resources. __throwless__ - not only error handling and avoiding exceptions. It's more a philosophy of writing safer, more predictable code.
 
 ## Key Features
-- **Exception-free error handling**
+- **Exception-free error handling** - `Result<T, E>` for explicit error propagation
+- **Null-Safe Optional Values** - `Option<T>` for explicit presence/absence semantics
 - **Functional programming primitives**
-- **Header-only** - for easy integration
+- **Smart Memory Management** - `UniquePtr`, `SharedPtr`, `WeakPtr` with functional extensions
+- **Header-only** - easy integration, no compilation required
 - *C++20* compatible compiler (GCC 10+, Clang 10+)
 - Tested by [gtest](https://github.com/google/googletest): [tests](test/)
 
@@ -71,14 +73,14 @@ ctest --output-on-failure
 ```
 
 ## Roadmap
-In development:
-
+Planned:
 - More error variations (minimum to cover all `std::exceptions`)
+- A more precise hierarchy of errors that will allow them to be handled polymorphically
 - Pattern matching utilities (`match` syntax)
+- More examples and documentation
 - Chainable combinators
-- SharedPtr, WeakPtr
-- Thread-safe atomic versions (?)
+- Thread-safe atomic versions (?..)
 
 ## Afterword
 This repository was mostly an educational one for me to practice concepts in C++, apply the knowledge I gained from functional programming, and practice GTest features that I hadn't used before.
-If you see serious errors in the code, please let me know so that the malicious code does not spread.
+If you see serious issue in the code, please let me know so that the malicious code does not spread.
