@@ -1,6 +1,8 @@
 #ifndef TMN_THROWLESS_TEST_UTILS_HPP
 #define TMN_THROWLESS_TEST_UTILS_HPP
 
+#include <cstddef>
+
 namespace tmn::test_utils {
 
 struct UniqueTestObject {
@@ -80,6 +82,25 @@ struct SharedTestObject {
     oth.value = -1;
   }
 
+  SharedTestObject& operator=(const SharedTestObject& oth) noexcept {
+    if (this != &oth){
+      value = oth.value;
+      id = ++constructor_count;
+      ++copy_count;
+    }
+    return *this;
+  }
+
+  SharedTestObject& operator=(SharedTestObject&& oth) noexcept {
+    if (this != &oth){
+      value = oth.value;
+      id = oth.id;
+      ++move_count;
+      oth.value = -1;
+    }
+    return *this;
+  }
+
   ~SharedTestObject() {
     ++destructor_count;
   }
@@ -107,6 +128,27 @@ struct SharedTestDeleter {
   static void reset() {
     delete_count = 0;
     last_deleted_value = 0;
+  }
+};
+
+struct SharedTestArrayDeleter {
+  static inline int delete_count = 0;
+  static inline int last_deleted_size = 0;
+
+  void operator()(SharedTestObject* ptr, size_t size) {
+    if (ptr) {
+      last_deleted_size = static_cast<int>(size);
+      for (size_t i = 0; i < size; ++i) {
+        ptr[i].value = -999;
+      }
+      delete[] ptr;
+      ++delete_count;
+    }
+  }
+
+  static void reset() {
+    delete_count = 0;
+    last_deleted_size = 0;
   }
 };
 

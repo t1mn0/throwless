@@ -1,5 +1,5 @@
-#ifndef TMN_THROWLESS_ARRAY_CONTROL_BLOCK_HPP
-#error "Include ArrayControlBlock.hpp instead of ArrayControlBlock.tpp"
+#ifndef TMN_THROWLESS_SHARED_PTR_HPP
+#error "Include SharedPtr.hpp instead of ArrayControlBlock.tpp"
 #endif
 
 #include "ArrayControlBlock.hpp"
@@ -10,6 +10,7 @@ template<typename T>
 ArrayControlBlock<T>::ArrayControlBlock(T* ptr, size_t size, std::function<void(T*, size_t)> del)
   : ref_count(1), weak_count(0), array_ptr(ptr), array_size(size), deleter(std::move(del))
 {
+  // If the deleter is specified as nullptr, then we use by default:
   if (!deleter) {
     deleter = [](T* p, size_t) { delete[] p; };
   }

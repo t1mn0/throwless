@@ -104,9 +104,11 @@ bool UniquePtr<T[], std::default_delete<T[]>>::operator!=(std::nullptr_t) const 
 
 // <--- array-specific methods --->
 template <typename T>
-Option<T> UniquePtr<T[], std::default_delete<T[]>>::try_get_val_at(std::size_t index) const noexcept {
+auto UniquePtr<T[], std::default_delete<T[]>>::at(std::size_t index) const noexcept
+  -> Result<T, err::EmptyArrErr>
+{
   if (!has_resource()) {
-    return Option<T>();
+    return Result<T, err::EmptyArrErr>::Err();
   }
 
   // No bounds checking. User must use valid index.
@@ -116,7 +118,7 @@ Option<T> UniquePtr<T[], std::default_delete<T[]>>::try_get_val_at(std::size_t i
   // it is used for the proper operation of the idea of ownership in C++.
   // I think the most correct implementation in this case is to use a UniquePtr<T[]>
   // and size in the same container, for example, in an Array or Vector.
-  return Option<T>(array_ptr[index]);
+  return Result<T, err::EmptyArrErr>::Ok(array_ptr[index]);
 }
 
 template <typename T>

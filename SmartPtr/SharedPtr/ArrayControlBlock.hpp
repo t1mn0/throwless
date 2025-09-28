@@ -1,5 +1,9 @@
-#ifndef TMN_THROWLESS_ARRAY_CONTROL_BLOCK_HPP
-#define TMN_THROWLESS_ARRAY_CONTROL_BLOCK_HPP
+#ifndef TMN_THROWLESS_SHARED_PTR_HPP
+#error "Include SharedPtr.hpp instead of ArrayControlBlock.hpp"
+#endif
+
+#ifndef TMN_THROWLESS_ARRAY_SHARED_PTR_CONTROL_BLOCK_HPP
+#define TMN_THROWLESS_ARRAY_SHARED_PTR_CONTROL_BLOCK_HPP
 
 #include <atomic>
 #include <functional>
@@ -22,11 +26,10 @@ struct ArrayControlBlock {
   bool decrement_weak() noexcept;
   size_t use_count() const noexcept;
   size_t size() const noexcept;
-
 };
 
 } // namespace tmn;
 
 #include "ArrayControlBlock.tpp"
 
-#endif // TMN_THROWLESS_ARRAY_CONTROL_BLOCK_HPP
+#endif // TMN_THROWLESS_ARRAY_SHARED_PTR_CONTROL_BLOCK_HPP

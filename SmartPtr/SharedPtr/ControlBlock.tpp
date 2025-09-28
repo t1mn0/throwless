@@ -1,4 +1,8 @@
-#ifndef TMN_THROWLESS_CONTROL_BLOCK_HPP
+#ifndef TMN_THROWLESS_SHARED_PTR_HPP
+#error "Include SharedPtr.hpp instead of ControlBlock.tpp"
+#endif
+
+#ifndef TMN_THROWLESS_SHARED_PTR_CONTROL_BLOCK_HPP
 #error "Include ControlBlock.hpp instead of ControlBlock.tpp"
 #endif
 

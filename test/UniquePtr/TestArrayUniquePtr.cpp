@@ -62,14 +62,13 @@ TEST_F(UniquePtrArrayFixture, ArrayTryGetValAt) {
   auto* raw_array = new tmn::test_utils::UniqueTestObject[2]{tmn::test_utils::UniqueTestObject(10), tmn::test_utils::UniqueTestObject(20)};
   tmn::UniquePtr<tmn::test_utils::UniqueTestObject[]> ptr(raw_array);
 
-  auto result1 = ptr.try_get_val_at(0);
-  auto result2 = ptr.try_get_val_at(1);
+  auto result1 = ptr.at(0);
+  ASSERT_TRUE(result1.is_ok());
+  auto result2 = ptr.at(1);
+  ASSERT_TRUE(result2.is_ok());
 
-  EXPECT_TRUE(result1.has_value());
-  EXPECT_EQ(result1.value().value, 10);
-
-  EXPECT_TRUE(result2.has_value());
-  EXPECT_EQ(result2.value().value, 20);
+  EXPECT_EQ(result1.unwrap_value().value, 10);
+  EXPECT_EQ(result2.unwrap_value().value, 20);
 }
 
 TEST_F(UniquePtrArrayFixture, ArrayReset) {

@@ -163,14 +163,20 @@ void SharedPtr<T>::reset(T* new_resource_ptr, Deleter deleter) {
   }
 }
 
+// The equality of two sharedptrs is understood as equality:
+// a) Their resources
+// b) The counters of their resources (control blocks)
+// Are compare by ">", "<" in the sense of raw pointers:
+// SharedPtr1 < SharedPtr2 <=> SharedPtr1.resource < SharedPtr2.resource
+
 template<typename T>
 bool SharedPtr<T>::operator==(const SharedPtr& oth) const noexcept {
-  return resource_ptr == oth.resource_ptr;
+  return control_block == oth.control_block;
 }
 
 template<typename T>
 bool SharedPtr<T>::operator!=(const SharedPtr& oth) const noexcept {
-  return resource_ptr != oth.resource_ptr;
+  return control_block != oth.control_block;
 }
 
 template<typename T>

@@ -3,6 +3,7 @@
 
 #include "Option/Option.hpp"
 #include "SmartPtr/UniquePtr/UniquePtr.hpp"
+#include "SmartPtr/SharedPtr/SharedPtr.hpp"
 
 tmn::Option<std::string> find_user_name(int user_id) {
   if (user_id == 1) return std::string("Alice");
@@ -26,4 +27,10 @@ int main() {
     std::cout << *up.try_get().value_or(backup_on_heap) << std::endl; // cout: User not found;
   }
 
+  // - - - - - - - - - - - - - - - - - - - - - - -
+  tmn::SharedPtr<std::string[]> ptr1(new std::string[2]{"qwerty", "dvorak"}, 2);
+  tmn::SharedPtr<std::string[]> ptr2 = ptr1;
+  std::cout << ptr1.use_count() << std::endl; // cout: 2;
+
+  return 0;
 }

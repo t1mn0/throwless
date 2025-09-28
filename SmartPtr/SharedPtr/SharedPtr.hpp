@@ -77,6 +77,7 @@ public:
 
 } // namespace tmn;
 
+#include "ArraySharedPtr.hpp"
 #include "SharedPtr.tpp"
 
 #endif // TMN_THROWLESS_SHARED_PTR_HPP
