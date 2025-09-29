@@ -1,5 +1,7 @@
 #ifndef TMN_THROWLESS_OPTION_HPP
-#error "Include Option.hpp instead of CoproductOperation.tpp"
+#error \
+"CoproductOperations.hpp is a file with hidden implementation details\
+of the Option class and is not intended for use"
 #endif
 
 #include <utility> // for: declval;
