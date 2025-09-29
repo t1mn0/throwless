@@ -1,5 +1,5 @@
 #ifndef TMN_THROWLESS_SHARED_PTR_HPP
-#error "Include SharedPtr.hpp instead of ArraySharedPtr.hpp"
+#error "Specialization of a class must follow the declaration of the main class template"
 #endif
 
 #include "SharedPtr.hpp"
@@ -9,19 +9,12 @@
 
 namespace tmn {
 
-// Forward declaration for friendship:
-template<typename T>
-class SharedPtr;
-
-template<typename T>
-class WeakPtr;
-
 // Specialization for arrays T[]
 template<typename T>
 class SharedPtr<T[]> {
 private: //* fields:
   T* resource_ptr = nullptr;
-  ArrayControlBlock<T>* control_block = nullptr;
+  ControlBlock<T[]>* control_block = nullptr;
 
 private: //* methods:
   void cleanup() noexcept;
@@ -31,11 +24,16 @@ private: //* methods:
 
   void swap(SharedPtr& other) noexcept;
 
+  SharedPtr(T* ptr, size_t size, ControlBlock<T[]>* cb) noexcept;
+
+private: //* friends:
   friend void swap(SharedPtr<T[]>& first, SharedPtr<T[]>& second)
     noexcept(noexcept(first.swap(second)))
   {
     first.swap(second);
   }
+
+  friend class WeakPtr<T[]>;
 
 public:
 //*   <--- constructors, (~)ro5, destructor (etc) --->
@@ -70,7 +68,7 @@ public:
 
   bool has_resource() const noexcept;
   explicit operator bool() const noexcept;
-  size_t use_count() const noexcept;
+  size_t counter_value() const noexcept;
   bool is_unique() const noexcept;
 
   size_t size() const noexcept;

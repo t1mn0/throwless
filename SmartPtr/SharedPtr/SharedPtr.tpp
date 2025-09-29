@@ -10,8 +10,8 @@ namespace tmn {
 
 template<typename T>
 void SharedPtr<T>::cleanup() noexcept {
-  if (control_block) {
-    if (control_block->decrement_ref()) {
+  if (control_block != nullptr) {
+    if (control_block->decrement_strong()) {
       delete control_block;
     }
   }
@@ -23,7 +23,7 @@ template<typename T>
 template<typename U> requires std::is_convertible_v<U*, T*>
 void SharedPtr<T>::copy_from(const SharedPtr<U>& oth) noexcept {
   if (oth.control_block) {
-    oth.control_block->increment_ref();
+    oth.control_block->increment_strong();
   }
 
   resource_ptr = oth.resource_ptr;
@@ -41,6 +41,11 @@ SharedPtr<T>::SharedPtr(T* ptr) : resource_ptr(ptr) {
   if (ptr) {
     control_block = new ControlBlock<T>(ptr);
   }
+}
+
+template<typename T>
+SharedPtr<T>::SharedPtr(T* ptr, ControlBlock<T>* cb) : resource_ptr(ptr), control_block(cb) {
+  cb->increment_strong();
 }
 
 template<typename T>
@@ -78,8 +83,8 @@ SharedPtr<T>::~SharedPtr() {
 template<typename T>
 SharedPtr<T>& SharedPtr<T>::operator=(const SharedPtr& oth) noexcept {
   if (this != &oth) {
-      cleanup();
-      copy_from(oth);
+    cleanup();
+    copy_from(oth);
   }
   return *this;
 }
@@ -126,6 +131,7 @@ T& SharedPtr<T>::operator*() const noexcept {
 template<typename T>
 T* SharedPtr<T>::operator->() const noexcept {
   // assert(resource_ptr != nullptr && "Attempt to access a null SharedPtr via ->");
+  // or throw(...)
   // User should think and process about which pointer the user will receive:
   return resource_ptr;
 }
@@ -136,13 +142,13 @@ SharedPtr<T>::operator bool() const noexcept {
 }
 
 template<typename T>
-size_t SharedPtr<T>::use_count() const noexcept {
-  return control_block ? control_block->use_count() : 0;
+size_t SharedPtr<T>::counter_value() const noexcept {
+  return control_block ? control_block->counter_value() : 0;
 }
 
 template<typename T>
 bool SharedPtr<T>::is_unique() const noexcept {
-  return use_count() == 1;
+  return counter_value() == 1;
 }
 template<typename T>
 void SharedPtr<T>::reset(T* new_resource_ptr) {

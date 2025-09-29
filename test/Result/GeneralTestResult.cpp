@@ -6,7 +6,7 @@
 #include "../../Result/Result.hpp"
 #include "../../Error/Error.hpp"
 #include "../../Error/ErrorConcept.hpp"
-#include "../RandomGenerator.hpp"
+#include "../_TestUtils/RandomGenerator.hpp"
 
 namespace tmn::test_utils {
 

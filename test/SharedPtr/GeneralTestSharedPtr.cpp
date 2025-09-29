@@ -1,8 +1,7 @@
-
 #include <gtest/gtest.h>
 
 #include "../../SmartPtr/SharedPtr/SharedPtr.hpp"
-#include "../Utils.hpp"
+#include "../_TestUtils/Utils.hpp"
 
 class SharedPtrFixture : public ::testing::Test {
 protected:
@@ -22,7 +21,7 @@ TEST_F(SharedPtrFixture, DefaultConstructor) {
 
   EXPECT_FALSE(static_cast<bool>(ptr));
   EXPECT_EQ(ptr.get(), nullptr);
-  EXPECT_EQ(ptr.use_count(), 0);
+  EXPECT_EQ(ptr.counter_value(), 0);
   EXPECT_FALSE(ptr.try_get().has_value());
 }
 
@@ -32,7 +31,7 @@ TEST_F(SharedPtrFixture, ConstructorWithPointer) {
 
   EXPECT_TRUE(static_cast<bool>(ptr));
   EXPECT_EQ(ptr.get()->value, 42);
-  EXPECT_EQ(ptr.use_count(), 1);
+  EXPECT_EQ(ptr.counter_value(), 1);
   EXPECT_TRUE(ptr.is_unique());
   EXPECT_EQ(ptr.try_get().value()->value, 42);
 }
@@ -49,8 +48,8 @@ TEST_F(SharedPtrFixture, CopyConstructor) {
   auto ptr1 = tmn::SharedPtr(new tmn::test_utils::SharedTestObject(50));
   auto ptr2 = ptr1;
 
-  EXPECT_EQ(ptr1.use_count(), 2);
-  EXPECT_EQ(ptr2.use_count(), 2);
+  EXPECT_EQ(ptr1.counter_value(), 2);
+  EXPECT_EQ(ptr2.counter_value(), 2);
   EXPECT_EQ(ptr1.get(), ptr2.get());
   EXPECT_EQ(ptr1.get()->value, 50);
   EXPECT_EQ(ptr2.get()->value, 50);
@@ -64,8 +63,8 @@ TEST_F(SharedPtrFixture, CopyAssignment) {
 
   ptr2 = ptr1;
 
-  EXPECT_EQ(ptr1.use_count(), 2);
-  EXPECT_EQ(ptr2.use_count(), 2);
+  EXPECT_EQ(ptr1.counter_value(), 2);
+  EXPECT_EQ(ptr2.counter_value(), 2);
   EXPECT_EQ(ptr1.get(), ptr2.get());
 }
 
@@ -76,9 +75,9 @@ TEST_F(SharedPtrFixture, MoveConstructor) {
   auto ptr2 = std::move(ptr1);
 
   EXPECT_FALSE(static_cast<bool>(ptr1));
-  EXPECT_EQ(ptr1.use_count(), 0);
+  EXPECT_EQ(ptr1.counter_value(), 0);
   EXPECT_TRUE(static_cast<bool>(ptr2));
-  EXPECT_EQ(ptr2.use_count(), 1);
+  EXPECT_EQ(ptr2.counter_value(), 1);
   EXPECT_EQ(ptr2.get(), original_ptr);
   EXPECT_TRUE(ptr2.is_unique());
 }
@@ -93,7 +92,7 @@ TEST_F(SharedPtrFixture, MoveAssignment) {
   EXPECT_FALSE(static_cast<bool>(ptr1));
   EXPECT_TRUE(static_cast<bool>(ptr2));
   EXPECT_EQ(ptr2.get(), original_ptr);
-  EXPECT_EQ(ptr2.use_count(), 1);
+  EXPECT_EQ(ptr2.counter_value(), 1);
 }
 
 TEST_F(SharedPtrFixture, ResetToNull) {
@@ -101,7 +100,7 @@ TEST_F(SharedPtrFixture, ResetToNull) {
   ptr.reset();
 
   EXPECT_FALSE(static_cast<bool>(ptr));
-  EXPECT_EQ(ptr.use_count(), 0);
+  EXPECT_EQ(ptr.counter_value(), 0);
   EXPECT_EQ(ptr.get(), nullptr);
 }
 
@@ -112,7 +111,7 @@ TEST_F(SharedPtrFixture, ResetToNewPointer) {
   ptr.reset(new_ptr);
 
   EXPECT_TRUE(static_cast<bool>(ptr));
-  EXPECT_EQ(ptr.use_count(), 1);
+  EXPECT_EQ(ptr.counter_value(), 1);
   EXPECT_EQ(ptr.get()->value, 90);
 }
 
@@ -180,11 +179,11 @@ TEST_F(SharedPtrFixture, MultipleOwnersDestruction) {
 
     {
       tmn::SharedPtr<tmn::test_utils::SharedTestObject> ptr2 = ptr1;
-      EXPECT_EQ(ptr1.use_count(), 2);
+      EXPECT_EQ(ptr1.counter_value(), 2);
       EXPECT_EQ(tmn::test_utils::SharedTestObject::destructor_count, 0);
     } // ptr2 destroyed, but object lives on
 
-    EXPECT_EQ(ptr1.use_count(), 1);
+    EXPECT_EQ(ptr1.counter_value(), 1);
     EXPECT_EQ(tmn::test_utils::SharedTestObject::destructor_count, 0);
   } // ptr1 destroyed, object deleted
 
@@ -209,7 +208,7 @@ TEST_F(SharedPtrFixture, EmptySharedPtrOperations) {
 
   ASSERT_NO_THROW(ptr.reset());
   ASSERT_NO_THROW(ptr.get());
-  ASSERT_NO_THROW(ptr.use_count());
+  ASSERT_NO_THROW(ptr.counter_value());
   ASSERT_NO_THROW(ptr.is_unique());
   ASSERT_NO_THROW(ptr.try_get());
 

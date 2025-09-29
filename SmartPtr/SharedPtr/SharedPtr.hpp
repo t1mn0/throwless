@@ -6,6 +6,10 @@
 
 namespace tmn {
 
+// Forward declaration for friendship:
+template<typename T>
+class WeakPtr;
+
 template<typename T>
 class SharedPtr {
 private: //* fields:
@@ -26,9 +30,16 @@ private: //* methods:
   // will make the `swap()` private and delegate it to the overload-friend std::swap:
   void swap(SharedPtr& oth) noexcept;
 
+  // for lock-method WeakPtr (not increase cb, this is done externally):
+  SharedPtr(T* ptr, ControlBlock<T>* cb);
+
+private: //* friends:
   friend void swap(SharedPtr<T>& first, SharedPtr<T>& second) noexcept(noexcept(first.swap(second))) {
     first.swap(second);
   }
+
+  template<typename U>
+  friend class WeakPtr;
 
 public:
 //*   <--- constructors, (~)ro5, destructor (etc) --->
@@ -59,7 +70,7 @@ public:
   T* operator->() const noexcept;
 
   explicit operator bool() const noexcept;
-  size_t use_count() const noexcept;
+  size_t counter_value() const noexcept;
   bool is_unique() const noexcept;
 
   // Modifiers:
@@ -79,5 +90,6 @@ public:
 
 #include "ArraySharedPtr.hpp"
 #include "SharedPtr.tpp"
+#include "../WeakPtr/WeakPtr.hpp"
 
 #endif // TMN_THROWLESS_SHARED_PTR_HPP

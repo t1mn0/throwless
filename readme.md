@@ -5,17 +5,17 @@ __throwless__ is lightweight *C++20* (nearly) header-only library for functional
 ## Key Features
 - **Exception-free error handling** - `Result<T, E>` for explicit error propagation
 - **Null-Safe Optional Values** - `Option<T>` for explicit presence/absence semantics
-- **Functional programming primitives**
+- **Functional programming concepts**
 - **Smart Memory Management** - `UniquePtr`, `SharedPtr`, `WeakPtr` with functional extensions
 - **Header-only** - easy integration, no compilation required
 - *C++20* compatible compiler (GCC 10+, Clang 10+)
 - Tested by [gtest](https://github.com/google/googletest): [tests](test/)
 
 ## Implemented functionality
-- Error concept & related primitives: [Error](Error/)
-- Errors are actively used in conjunction with wrapper [Result](Result/)
-- Implementation of one of the most useful _monads_: [Option](include/Option/)
-- __todo:__ _describe smart ptr's functionality;_
+- Error concept & related primitives: [Error](Error/) - a unified Error concept that enables polymorphic error handling and seamless integration with custom error types
+- Result Monad [Result](Result/) - The `Result<T, E>` type for explicit, composable error handling, deeply integrated with the Error concept for ergonomic error propagation
+- Option Monad [Option](Option/) - `Option<T>` type representing optional values, implementing one of the most practical monads for null-safe programming
+- Smart Pointers [SmartPtr](SmartPtr/) - `UniquePtr<T>`, `SharedPtr<T>`, `WeakPtr<T>` with supporting _RAII_ semantics
 
 ## Quick Example
 ```cpp
@@ -74,12 +74,15 @@ ctest --output-on-failure
 
 ## Roadmap
 Planned:
-- More error variations (minimum to cover all `std::exceptions`)
-- A more precise hierarchy of errors that will allow them to be handled polymorphically
-- Pattern matching utilities (`match` syntax)
+- More Error variations (minimum to cover all `std::exceptions`);
+- A more precise hierarchy of errors that will allow them to be handled polymorphically (+ definitions and declarations of the corresponding Err-classes should be divided into files according to the hierarchies). Any user, if necessary, can use custom Errors to create their own version of the _throwless_-compatible error library;
+- Add `Make-` factories-functions (`MakeUniquePtr`, `MakeShared`, etc)
+- `SharedFromThis` functionality;
+- To develop a global strategy for handling the presented classes with the template type `T=void` and other specific types;
+- Pattern matching utilities (`Match-` syntax)
 - More examples and documentation
 - Chainable combinators
-- Thread-safe atomic versions (?..)
+- Thread-safe atomic versions (..?)
 
 ## Afterword
 This repository was mostly an educational one for me to practice concepts in C++, apply the knowledge I gained from functional programming, and practice GTest features that I hadn't used before.

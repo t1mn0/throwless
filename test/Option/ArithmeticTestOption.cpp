@@ -3,7 +3,7 @@
 #include <string>
 
 #include "../../Option/Option.hpp"
-#include "../RandomGenerator.hpp"
+#include "../_TestUtils/RandomGenerator.hpp"
 
 class OptionArithmeticTestFixture : public ::testing::Test {
 protected: //* fields:

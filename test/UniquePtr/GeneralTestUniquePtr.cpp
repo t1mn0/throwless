@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
 #include "../../SmartPtr/UniquePtr/UniquePtr.hpp"
-#include "../Utils.hpp"
+#include "../_TestUtils/Utils.hpp"
 
 class UniquePtrFixture : public ::testing::Test {
 protected:

@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
 #include "../../SmartPtr/SharedPtr/SharedPtr.hpp"
-#include "../Utils.hpp"
+#include "../_TestUtils/Utils.hpp"
 
 class SharedPtrArrayTest : public ::testing::Test {
 protected:
@@ -21,7 +21,7 @@ TEST_F(SharedPtrArrayTest, DefaultConstructor) {
 
   EXPECT_FALSE(ptr);
   EXPECT_EQ(ptr.get(), nullptr);
-  EXPECT_EQ(ptr.use_count(), 0);
+  EXPECT_EQ(ptr.counter_value(), 0);
   EXPECT_EQ(ptr.size(), 0);
   EXPECT_TRUE(ptr.empty());
 }
@@ -32,7 +32,7 @@ TEST_F(SharedPtrArrayTest, ConstructorWithArray) {
 
   EXPECT_TRUE(ptr);
   EXPECT_EQ(ptr.get(), arr);
-  EXPECT_EQ(ptr.use_count(), 1);
+  EXPECT_EQ(ptr.counter_value(), 1);
   EXPECT_EQ(ptr.size(), 3);
   EXPECT_FALSE(ptr.empty());
   EXPECT_EQ(ptr[0].value, 10);
@@ -45,7 +45,7 @@ TEST_F(SharedPtrArrayTest, ConstructorWithCustomDeleter) {
   {
     tmn::SharedPtr<tmn::test_utils::SharedTestObject[]> ptr(arr, 2, tmn::test_utils::SharedTestArrayDeleter());
     EXPECT_TRUE(ptr);
-    EXPECT_EQ(ptr.use_count(), 1);
+    EXPECT_EQ(ptr.counter_value(), 1);
   }
 
   EXPECT_EQ(tmn::test_utils::SharedTestArrayDeleter::delete_count, 1);
@@ -56,8 +56,8 @@ TEST_F(SharedPtrArrayTest, CopyConstructor) {
   tmn::SharedPtr<tmn::test_utils::SharedTestObject[]> ptr1(new tmn::test_utils::SharedTestObject[2]{100, 200}, 2);
   tmn::SharedPtr<tmn::test_utils::SharedTestObject[]> ptr2(ptr1);
 
-  EXPECT_EQ(ptr1.use_count(), 2);
-  EXPECT_EQ(ptr2.use_count(), 2);
+  EXPECT_EQ(ptr1.counter_value(), 2);
+  EXPECT_EQ(ptr2.counter_value(), 2);
   EXPECT_EQ(ptr1.get(), ptr2.get());
   EXPECT_EQ(ptr1.size(), ptr2.size());
   EXPECT_EQ(ptr1[0].value, 100);
@@ -70,8 +70,8 @@ TEST_F(SharedPtrArrayTest, CopyAssignment) {
 
   ptr2 = ptr1;
 
-  EXPECT_EQ(ptr1.use_count(), 2);
-  EXPECT_EQ(ptr2.use_count(), 2);
+  EXPECT_EQ(ptr1.counter_value(), 2);
+  EXPECT_EQ(ptr2.counter_value(), 2);
   EXPECT_EQ(ptr1.get(), ptr2.get());
   EXPECT_EQ(ptr1[2].value, 500);
   EXPECT_EQ(ptr2[0].value, 300);
@@ -85,10 +85,10 @@ TEST_F(SharedPtrArrayTest, MoveConstructor) {
   tmn::SharedPtr<tmn::test_utils::SharedTestObject[]> ptr2(std::move(ptr1));
 
   EXPECT_FALSE(ptr1);
-  EXPECT_EQ(ptr1.use_count(), 0);
+  EXPECT_EQ(ptr1.counter_value(), 0);
   EXPECT_EQ(ptr1.size(), 0);
   EXPECT_TRUE(ptr2);
-  EXPECT_EQ(ptr2.use_count(), 1);
+  EXPECT_EQ(ptr2.counter_value(), 1);
   EXPECT_EQ(ptr2.get(), original_ptr);
   EXPECT_EQ(ptr2.size(), original_size);
   EXPECT_EQ(ptr2[1].value, 800);
@@ -160,7 +160,7 @@ TEST_F(SharedPtrArrayTest, Observers) {
 
   EXPECT_TRUE(ptr.has_resource());
   EXPECT_TRUE(static_cast<bool>(ptr));
-  EXPECT_EQ(ptr.use_count(), 1);
+  EXPECT_EQ(ptr.counter_value(), 1);
   EXPECT_TRUE(ptr.is_unique());
   EXPECT_EQ(ptr.size(), 3);
   EXPECT_FALSE(ptr.empty());
@@ -168,19 +168,19 @@ TEST_F(SharedPtrArrayTest, Observers) {
 
 TEST_F(SharedPtrArrayTest, UseCountWithMultipleReferences) {
   tmn::SharedPtr<tmn::test_utils::SharedTestObject[]> ptr1(new tmn::test_utils::SharedTestObject[2]{400, 500}, 2);
-  EXPECT_EQ(ptr1.use_count(), 1);
+  EXPECT_EQ(ptr1.counter_value(), 1);
   EXPECT_TRUE(ptr1.is_unique());
 
   tmn::SharedPtr<tmn::test_utils::SharedTestObject[]> ptr2 = ptr1;
-  EXPECT_EQ(ptr1.use_count(), 2);
-  EXPECT_EQ(ptr2.use_count(), 2);
+  EXPECT_EQ(ptr1.counter_value(), 2);
+  EXPECT_EQ(ptr2.counter_value(), 2);
   EXPECT_FALSE(ptr1.is_unique());
   EXPECT_FALSE(ptr2.is_unique());
 
   tmn::SharedPtr<tmn::test_utils::SharedTestObject[]> ptr3 = ptr2;
-  EXPECT_EQ(ptr1.use_count(), 3);
-  EXPECT_EQ(ptr2.use_count(), 3);
-  EXPECT_EQ(ptr3.use_count(), 3);
+  EXPECT_EQ(ptr1.counter_value(), 3);
+  EXPECT_EQ(ptr2.counter_value(), 3);
+  EXPECT_EQ(ptr3.counter_value(), 3);
 }
 
 TEST_F(SharedPtrArrayTest, Iterators) {
@@ -210,7 +210,7 @@ TEST_F(SharedPtrArrayTest, ResetWithNewArray) {
   ptr.reset(new tmn::test_utils::SharedTestObject[3]{10, 20, 30}, 3);
 
   EXPECT_TRUE(ptr);
-  EXPECT_EQ(ptr.use_count(), 1);
+  EXPECT_EQ(ptr.counter_value(), 1);
   EXPECT_EQ(ptr.size(), 3);
   EXPECT_EQ(ptr[2].value, 30);
 }
@@ -220,7 +220,7 @@ TEST_F(SharedPtrArrayTest, ResetWithDeleter) {
   ptr.reset(new tmn::test_utils::SharedTestObject[2]{40, 50}, 2, tmn::test_utils::SharedTestArrayDeleter());
 
   EXPECT_TRUE(ptr);
-  EXPECT_EQ(ptr.use_count(), 1);
+  EXPECT_EQ(ptr.counter_value(), 1);
 
   ptr.reset();
 
@@ -233,7 +233,7 @@ TEST_F(SharedPtrArrayTest, ResetToNullptr) {
   ptr.reset();
 
   EXPECT_FALSE(ptr);
-  EXPECT_EQ(ptr.use_count(), 0);
+  EXPECT_EQ(ptr.counter_value(), 0);
   EXPECT_EQ(ptr.size(), 0);
 }
 

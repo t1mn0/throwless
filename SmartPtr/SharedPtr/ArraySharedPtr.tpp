@@ -1,5 +1,5 @@
 #ifndef TMN_THROWLESS_SHARED_PTR_HPP
-#error "Include SharedPtr.hpp instead of ArraySharedPtr.tpp"
+#error "Definition of the class must follow the declaration of the class"
 #endif
 
 #include "SharedPtr.hpp"
@@ -11,7 +11,7 @@ namespace tmn {
 template<typename T>
 void SharedPtr<T[]>::cleanup() noexcept {
   if (control_block) {
-    if (control_block->decrement_ref()) {
+    if (control_block->decrement_strong()) {
       delete control_block;
     }
   }
@@ -24,7 +24,7 @@ template<typename T>
 template<typename U> requires std::is_convertible_v<U(*)[], T(*)[]>
 void SharedPtr<T[]>::copy_from(const SharedPtr<U[]>& oth) noexcept {
   if (oth.control_block) {
-    oth.control_block->increment_ref();
+    oth.control_block->increment_strong();
   }
 
   resource_ptr = oth.resource_ptr;
@@ -40,15 +40,19 @@ void SharedPtr<T[]>::swap(SharedPtr& oth) noexcept {
 template<typename T>
 SharedPtr<T[]>::SharedPtr(T* ptr, size_t size) : resource_ptr(ptr) {
   if (ptr && size > 0) {
-    control_block = new ArrayControlBlock<T>(ptr, size);
+    control_block = new ControlBlock<T[]>(ptr, size);
   }
 }
+
+template<typename T>
+SharedPtr<T[]>::SharedPtr(T* ptr, size_t size, ControlBlock<T[]>* cb)
+  noexcept : resource_ptr(ptr), control_block(cb) {}
 
 template<typename T>
 template<typename Deleter>
 SharedPtr<T[]>::SharedPtr(T* ptr, size_t size, Deleter deleter) : resource_ptr(ptr) {
   if (ptr && size > 0) {
-    control_block = new ArrayControlBlock<T>(ptr, size, std::move(deleter));
+    control_block = new ControlBlock<T[]>(ptr, size, std::move(deleter));
   }
 }
 
@@ -146,13 +150,13 @@ SharedPtr<T[]>::operator bool() const noexcept {
 }
 
 template<typename T>
-size_t SharedPtr<T[]>::use_count() const noexcept {
-  return control_block ? control_block->use_count() : 0;
+size_t SharedPtr<T[]>::counter_value() const noexcept {
+  return control_block ? control_block->counter_value() : 0;
 }
 
 template<typename T>
 bool SharedPtr<T[]>::is_unique() const noexcept {
-  return use_count() == 1;
+  return counter_value() == 1;
 }
 
 template<typename T>
@@ -180,7 +184,7 @@ void SharedPtr<T[]>::reset(T* new_ptr, size_t new_size) {
   cleanup();
   if (new_ptr && new_size > 0) {
     resource_ptr = new_ptr;
-    control_block = new ArrayControlBlock<T>(new_ptr, new_size);
+    control_block = new ControlBlock<T[]>(new_ptr, new_size);
   }
 }
 
@@ -190,7 +194,7 @@ void SharedPtr<T[]>::reset(T* new_ptr, size_t new_size, Deleter deleter) {
   cleanup();
   if (new_ptr && new_size > 0) {
     resource_ptr = new_ptr;
-    control_block = new ArrayControlBlock<T>(new_ptr, new_size, std::move(deleter));
+    control_block = new ControlBlock<T[]>(new_ptr, new_size, std::move(deleter));
   }
 }
 

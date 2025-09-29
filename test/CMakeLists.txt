@@ -15,21 +15,13 @@ set(COMMON_LINK_LIBS
     GTest::gtest_main
 )
 
-add_library(TestUtils STATIC
-    Utils.cpp
-)
-
-target_include_directories(TestUtils PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}
-)
-
 add_executable(ErrorTests
     Error/ErrorTest.cpp
     Error/TryOrConvertTest.cpp
 )
 
 target_include_directories(ErrorTests PRIVATE ${COMMON_INCLUDE_DIRS})
-target_link_libraries(ErrorTests PRIVATE ${COMMON_LINK_LIBS} TestUtils)
+target_link_libraries(ErrorTests PRIVATE ${COMMON_LINK_LIBS})
 add_test(NAME ErrorTests COMMAND ErrorTests)
 
 add_executable(OptionTests
@@ -38,13 +30,13 @@ add_executable(OptionTests
 )
 
 target_include_directories(OptionTests PRIVATE ${COMMON_INCLUDE_DIRS})
-target_link_libraries(OptionTests PRIVATE ${COMMON_LINK_LIBS} TestUtils)
+target_link_libraries(OptionTests PRIVATE ${COMMON_LINK_LIBS})
 add_test(NAME OptionTests COMMAND OptionTests)
 
 add_executable(ResultTests Result/GeneralTestResult.cpp)
 
 target_include_directories(ResultTests PRIVATE ${COMMON_INCLUDE_DIRS})
-target_link_libraries(ResultTests PRIVATE ${COMMON_LINK_LIBS} TestUtils)
+target_link_libraries(ResultTests PRIVATE ${COMMON_LINK_LIBS})
 add_test(NAME ResultTests COMMAND ResultTests)
 
 add_executable(UniquePtrTests
@@ -53,7 +45,7 @@ add_executable(UniquePtrTests
 )
 
 target_include_directories(UniquePtrTests PRIVATE ${COMMON_INCLUDE_DIRS})
-target_link_libraries(UniquePtrTests PRIVATE ${COMMON_LINK_LIBS} TestUtils)
+target_link_libraries(UniquePtrTests PRIVATE ${COMMON_LINK_LIBS})
 add_test(NAME UniquePtrTests COMMAND UniquePtrTests)
 
 add_executable(SharedPtrTests
@@ -62,5 +54,14 @@ add_executable(SharedPtrTests
 )
 
 target_include_directories(SharedPtrTests PRIVATE ${COMMON_INCLUDE_DIRS})
-target_link_libraries(SharedPtrTests PRIVATE ${COMMON_LINK_LIBS} TestUtils)
+target_link_libraries(SharedPtrTests PRIVATE ${COMMON_LINK_LIBS})
 add_test(NAME SharedPtrTests COMMAND SharedPtrTests)
+
+add_executable(WeakPtrTests
+    WeakPtr/GeneralTestWeakPtr.cpp
+    WeakPtr/TestArrayWeakPtr.cpp
+)
+
+target_include_directories(WeakPtrTests PRIVATE ${COMMON_INCLUDE_DIRS})
+target_link_libraries(WeakPtrTests PRIVATE ${COMMON_LINK_LIBS})
+add_test(NAME WeakPtrTests COMMAND WeakPtrTests)
