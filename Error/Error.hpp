@@ -6,6 +6,15 @@
 #include <typeinfo> // for: typeid;
 #include <limits> // for: std::numeric_limits;
 
+//                    AnyErr
+//                      |
+//  ----------------------------------------
+//  |     |   |             |              |
+// StrErr |  OutOfRangeErr  |     GeneralExceptionErr
+//        |                 |
+//    EmptyArrErr         NullPtrArr
+// (etc)
+
 #include "ErrorConcept.hpp"
 
 namespace tmn::err {
@@ -124,6 +133,43 @@ public:
 };
 
 static_assert(Error<EmptyArrErr>, "EmptyArrErr must satisfy Error concept");
+
+struct NullPtrErr : public AnyErr {
+private:
+  std::string expected_ptr_type_ = "unknown ptr type";
+
+public:
+  NullPtrErr() : AnyErr("Null pointer Error") {}
+
+  NullPtrErr(const std::string& expected_ptr_type = "")
+    : AnyErr("Null pointer Error"),
+      expected_ptr_type_(expected_ptr_type.empty() ? "unknown pointer type" : expected_ptr_type) {}
+
+  NullPtrErr(const char* expected_ptr_type = nullptr)
+    : AnyErr(std::string("Null pointer Error: ")),
+      expected_ptr_type_(expected_ptr_type ? expected_ptr_type : "unknown pointer type") {}
+
+  template<typename T>
+  explicit NullPtrErr(const T* _ = nullptr)
+    : AnyErr("Null pointer Error"),
+      expected_ptr_type_(typeid(T).name()) {}
+
+  const std::string& pointer_type() const noexcept { return expected_ptr_type_; }
+
+  std::string err_msg() const override {
+    return msg_ + ". Expected '" + expected_ptr_type_ + "' pointer type";
+  }
+
+  const char* what() const noexcept override {
+    return msg_.c_str();
+  }
+
+  bool operator==(const NullPtrErr& oth) const noexcept {
+    return expected_ptr_type_ == oth.expected_ptr_type_ && msg_ == oth.msg_;
+  }
+};
+
+static_assert(Error<NullPtrErr>, "NullPtrErr must satisfy Error concept");
 
 } // namespace tmn::err;
 
