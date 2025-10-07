@@ -1,9 +1,9 @@
 #include <iostream>
 
-#include "Error/Error.hpp"
-#include "Error/TryOrConvert.hpp"
-#include "Option/Option.hpp"
-#include "Result/Result.hpp"
+#include "include/Error/Error.hpp"
+#include "include/Error/TryOrConvert.hpp"
+#include "include/Option/Option.hpp"
+#include "include/Result/Result.hpp"
 
 using namespace tmn;
 

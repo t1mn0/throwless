@@ -67,7 +67,7 @@ git clone https://github.com/t1mn0/throwless.git
 ```
 2. Use it in the code as a pure headers:
 ```cpp
-#include "libs/throwless/Option/Option.hpp"
+#include "libs/throwless/include/Option/Option.hpp"
 ```
 
 ## Building and Testing
