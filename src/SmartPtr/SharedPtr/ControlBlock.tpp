@@ -15,11 +15,11 @@ namespace tmn {
 
 template<typename T>
 ControlBlock<T>::ControlBlock(T* ptr)
-  : ref_count(1), weak_count(0), object_ptr(ptr), deleter([](T* p) { delete p; }) {}
+  : ref_count(0), weak_count(0), object_ptr(ptr), deleter([](T* p) { delete p; }) {}
 
 template<typename T>
 ControlBlock<T>::ControlBlock(T* ptr, std::function<void(T*)> del)
-  : ref_count(1), weak_count(0), object_ptr(ptr), deleter(std::move(del))
+  : ref_count(0), weak_count(0), object_ptr(ptr), deleter(std::move(del))
 {
   if (deleter == nullptr) {
     throw err::NullPtrErr("Deleter");

@@ -94,7 +94,7 @@ ctest --output-on-failure
 Planned:
 - More `Error` variations (minimum to cover all `std::exceptions`);
 - A more precise hierarchy of errors that will allow them to be handled polymorphically (+ definitions and declarations of the corresponding `Error`-classes should be divided into files according to the hierarchies). Any user, if necessary, can use custom Errors to create their own version of the _throwless_-compatible error library;
-- Add `Make-` factories-functions (`MakeUniquePtr`, `MakeShared`, etc)
+- To narrow down the restrictions imposed on the types of wrappers;
 - `SharedFromThis` functionality;
 - To develop a global strategy for handling the presented classes with the template type `T=void` and other specific types;
 - Pattern matching utilities (`Match-` syntax)

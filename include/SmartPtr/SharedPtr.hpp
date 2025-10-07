@@ -41,6 +41,9 @@ private: //* friends:
   template<typename U>
   friend class WeakPtr;
 
+  template <typename U, typename... Args>
+  friend SharedPtr<U> make_shared_ptr(Args&&... args);
+
 public:
 //*   <--- constructors, (~)ro5, destructor (etc) --->
   SharedPtr() noexcept = default;
@@ -90,6 +93,7 @@ public:
 
 #include "../../src/SmartPtr/SharedPtr/ArraySharedPtr.hpp"
 #include "../../src/SmartPtr/SharedPtr/SharedPtr.tpp"
+#include "../../src/SmartPtr/SharedPtr/MakeSharedPtr.tpp"
 #include "WeakPtr.hpp"
 
 #endif // TMN_THROWLESS_SHARED_PTR_HPP

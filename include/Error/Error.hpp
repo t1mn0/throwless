@@ -9,10 +9,14 @@
 //                    AnyErr
 //                      |
 //  ----------------------------------------
-//  |     |   |             |              |
-// StrErr |  OutOfRangeErr  |     GeneralExceptionErr
-//        |                 |
-//    EmptyArrErr         NullPtrArr
+//  |     | |  |            |  |           |
+// StrErr | | OutOfRangeErr |  |  GeneralExceptionErr
+//        | |               |  |
+//        | InvalidArgErr   |  |
+//        |                 |  |
+//    EmptyArrErr           |  BadAllocErr
+//                          |
+//                      NullPtrErr
 // (etc)
 
 #include "ErrorConcept.hpp"
@@ -52,7 +56,7 @@ public:
   // 2. return Result<Config, StrErr>::Err("Port must be in range 1-65535");
   // Second option is more laconic and does not contain unnecessary syntactic repetitions Err-Err;
   // Similar reasoning is applied to other wrappers of Error<E>;
-  StrErr() : AnyErr("Undefined error") {}
+  StrErr() : AnyErr("Undefined Str Error") {}
   StrErr(const std::string& msg) : AnyErr(msg) {}
   StrErr(const char* msg) : AnyErr(msg) {}
 
@@ -60,8 +64,7 @@ public:
   StrErr(Args&&... args) : AnyErr(args...) {}
 
   bool operator==(const StrErr& oth) const noexcept {
-    const auto* derived = dynamic_cast<const StrErr*>(&oth);
-    return derived->msg_ == oth.msg_;
+    return msg_ == oth.msg_;
   }
 };
 
@@ -75,7 +78,7 @@ private:
 public:
   template<typename E> requires std::derived_from<E, std::exception>
   explicit GeneralExceptionErr(const E& ex) : AnyErr(ex.what()), _exception_name(typeid(ex).name()) {}
-  GeneralExceptionErr() : AnyErr("Unknown error") {}
+  GeneralExceptionErr() : AnyErr("Unknown General Exception Error") {}
 
   std::string exception_name() const noexcept { return _exception_name; }
   std::string err_msg() const noexcept { return "[" + _exception_name + "]: "+ msg_; }
@@ -170,6 +173,50 @@ public:
 };
 
 static_assert(Error<NullPtrErr>, "NullPtrErr must satisfy Error concept");
+
+struct BadAllocErr : public AnyErr {
+public:
+  BadAllocErr() : AnyErr("Bad Allocation Error") {}
+  BadAllocErr(const std::string& msg) : AnyErr(msg) {}
+  BadAllocErr(const char* msg) : AnyErr(msg) {}
+
+  template <typename...Args> requires std::constructible_from<std::string, Args...>
+  BadAllocErr(Args&&... args) : AnyErr(args...) {}
+
+  bool operator==(const BadAllocErr& oth) const noexcept {
+    return msg_ == oth.msg_;
+  }
+};
+
+static_assert(Error<NullPtrErr>, "BadAllocErr must satisfy Error concept");
+
+struct InvalidArgErr : public AnyErr {
+private:
+  // description of the limitations of the expected argument value:
+  std::string expected_limits = "Unspecified limits";
+
+public:
+  InvalidArgErr() : AnyErr("Invalid Argument Error") {}
+  InvalidArgErr(const std::string& msg) : AnyErr(msg) {}
+  InvalidArgErr(const std::string& msg, const std::string& expected_limits)
+    : AnyErr(msg), expected_limits(expected_limits) {}
+  InvalidArgErr(const std::string& msg, const char* expected_limits)
+    : AnyErr(msg), expected_limits(expected_limits) {}
+  InvalidArgErr(const char* msg) : AnyErr(msg) {}
+  InvalidArgErr(const char* msg, const char* expected_limits)
+    : AnyErr(msg), expected_limits(expected_limits) {}
+  InvalidArgErr(const char* msg, const std::string& expected_limits)
+    : AnyErr(msg), expected_limits(expected_limits) {}
+
+  template <typename...Args> requires std::constructible_from<std::string, Args...>
+  InvalidArgErr(Args&&... args) : AnyErr(args...) {}
+
+  bool operator==(const InvalidArgErr& oth) const noexcept {
+    return msg_ == oth.msg_ && expected_limits == oth.expected_limits;
+  }
+};
+
+static_assert(Error<InvalidArgErr>, "InvalidArgErr must satisfy Error concept");
 
 } // namespace tmn::err;
 

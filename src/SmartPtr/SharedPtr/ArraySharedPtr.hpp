@@ -35,6 +35,9 @@ private: //* friends:
 
   friend class WeakPtr<T[]>;
 
+  template <typename U>
+  friend Result<SharedPtr<U[]>, err::AnyErr> make_shared_array(size_t size);
+
 public:
 //*   <--- constructors, (~)ro5, destructor (etc) --->
   SharedPtr() noexcept = default;

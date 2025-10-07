@@ -26,6 +26,16 @@ struct ControlBlock {
 private: //* fields:
   std::atomic<size_t> ref_count;
   std::atomic<size_t> weak_count;
+
+  // ControlBlock.object_ptr is the same pointer SharedPtr.resource_ptr;
+  // (!) We can optimize the storage of an object created through `make_shared` if we create
+  // a polymorphic CB analog that is will be aligned according to type T
+  // => this will allow for a single memory allocation for two objects at once (CB, resource)
+  // instead of two different ones.
+  // However, I haven't figured out how to avoid the `aligned_*` that clang considers
+  // "deprecated" in use
+  // (https://stackoverflow.com/questions/71828288/why-is-stdaligned-storage-to-be-deprecated-in-c23-and-what-to-use-instead)
+  // Therefore, in my implementation there is no such optimization for sharedptrs created through make_shared:
   T* object_ptr;
   std::function<void(T*)> deleter;
 

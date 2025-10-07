@@ -106,5 +106,6 @@ private: // friends:
 
 #include "../../src/SmartPtr/UniquePtr/ArrayUniquePtr.hpp"
 #include "../../src/SmartPtr/UniquePtr/UniquePtr.tpp" // for: UniquePtr<T> definition;
+#include "../../src/SmartPtr/UniquePtr/MakeUniquePtr.tpp" // for: MakeUniquePtr() function;
 
 #endif // TMN_THROWLESS_UNIQUE_PTR_HPP

@@ -40,6 +40,7 @@ template<typename T>
 SharedPtr<T>::SharedPtr(T* ptr) : resource_ptr(ptr) {
   if (ptr) {
     control_block = new ControlBlock<T>(ptr);
+    control_block->increment_strong();
   }
 }
 
@@ -53,6 +54,7 @@ template<typename Deleter>
 SharedPtr<T>::SharedPtr(T* ptr, Deleter deleter) : resource_ptr(ptr) {
   if (ptr) {
     control_block = new ControlBlock<T>(ptr, std::move(deleter));
+    control_block->increment_strong();
   }
 }
 
@@ -156,6 +158,7 @@ void SharedPtr<T>::reset(T* new_resource_ptr) {
   if (new_resource_ptr != nullptr) {
     resource_ptr = new_resource_ptr;
     control_block = new ControlBlock<T>(new_resource_ptr);
+    control_block->increment_strong();
   }
 }
 
@@ -166,6 +169,7 @@ void SharedPtr<T>::reset(T* new_resource_ptr, Deleter deleter) {
   if (new_resource_ptr) {
     resource_ptr = new_resource_ptr;
     control_block = new ControlBlock<T>(new_resource_ptr, std::move(deleter));
+    control_block->increment_strong();
   }
   resource_ptr = new_resource_ptr;
 }

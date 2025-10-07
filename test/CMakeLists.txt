@@ -42,6 +42,7 @@ add_test(NAME ResultTests COMMAND ResultTests)
 add_executable(UniquePtrTests
     UniquePtr/GeneralTestUniquePtr.cpp
     UniquePtr/TestArrayUniquePtr.cpp
+    UniquePtr/TestMakeUniquePtr.cpp
 )
 
 target_include_directories(UniquePtrTests PRIVATE ${COMMON_INCLUDE_DIRS})
@@ -51,6 +52,7 @@ add_test(NAME UniquePtrTests COMMAND UniquePtrTests)
 add_executable(SharedPtrTests
     SharedPtr/GeneralTestSharedPtr.cpp
     SharedPtr/TestArraySharedPtr.cpp
+    SharedPtr/TestMakeSharedPtr.cpp
 )
 
 target_include_directories(SharedPtrTests PRIVATE ${COMMON_INCLUDE_DIRS})

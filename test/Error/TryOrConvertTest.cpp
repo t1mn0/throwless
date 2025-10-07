@@ -21,5 +21,5 @@ TEST(TryOrConvertTest, BasicFunctionality) {
   auto unknown_throwing_fn = []() -> int { throw 42; };
   auto unknown_error_result = tmn::try_or_convert(unknown_throwing_fn);
   EXPECT_TRUE(unknown_error_result.is_err());
-  EXPECT_EQ(unknown_error_result.unwrap_err().err_msg(), "[Unknown type]: Unknown error");
+  EXPECT_EQ(unknown_error_result.unwrap_err().err_msg(), "[Unknown type]: Unknown General Exception Error");
 }
