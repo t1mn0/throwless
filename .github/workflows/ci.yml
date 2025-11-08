@@ -1,0 +1,31 @@
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build_test:
+    runs-on: ubuntu-24.04
+    steps:
+    - uses: actions/checkout@v4
+    - name: installing dependencies
+      run: |
+        apt update -y
+        apt install -y g++ make
+        make
+    - name: build_test
+      run: make
+      
+  run_tests:
+    runs-on: ubuntu-24.04
+    needs: build_test
+
+    steps:
+      - name: Download test binaries
+        uses: actions/download-artifact@v4
+        with:
+          name: test-binaries
+        
+      - name: run tests
+        run: ctest
