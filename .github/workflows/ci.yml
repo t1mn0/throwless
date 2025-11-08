@@ -16,6 +16,13 @@ jobs:
   #     apt install -y g++ make
     - name: build_test
       run: cmake -B build -S . && cmake --build ${{github.workspace}}/build
+
+    - name: Upload test binaries
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-binaries
+        path: build/
+        retention-days: 7
       
   run_tests:
     runs-on: ubuntu-24.04
